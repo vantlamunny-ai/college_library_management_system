@@ -4,13 +4,12 @@ const createReservation = async (req, res) => {
     try {
         const {
             book_id,
-            student_id,
             expiry_date
         } = req.body;
 
         const result = await reservationService.createReservation(
             book_id,
-            student_id,
+            req.user.user_id,
             expiry_date
         );
 
@@ -34,6 +33,26 @@ const createReservation = async (req, res) => {
 const getAllReservations = async (req, res) => {
     try {
         const result = await reservationService.getAllReservations();
+
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+const getMyReservations = async (req, res) => {
+    try {
+        const result = await reservationService.getMyReservations(req.user.user_id);
 
         res.status(200).json({
             success: true,
@@ -130,6 +149,7 @@ const deleteReservation = async (req, res) => {
 module.exports = {
     createReservation,
     getAllReservations,
+    getMyReservations,
     getReservationById,
     updateReservation,
     deleteReservation

@@ -32,12 +32,22 @@ async function createFine(fineData) {
         reason
     ]);
 
-    await notificationService.createNotification(
-        student_id,
-        "Fine Generated",
-        `A fine of ₹${amount} has been generated for ${fine_type}. Please clear your pending library fine.`,
-        "Fine"
+    // notifications.user_id references users, not students — student_id
+    // and user_id are different columns, so the linked account has to be
+    // looked up rather than reused directly.
+    const [studentRows] = await db.query(
+        `SELECT user_id FROM students WHERE student_id = ?`,
+        [student_id]
     );
+
+    if (studentRows.length > 0) {
+        await notificationService.createNotification(
+            studentRows[0].user_id,
+            "Fine Generated",
+            `A fine of ₹${amount} has been generated for ${fine_type}. Please clear your pending library fine.`,
+            "Fine"
+        );
+    }
 
 
     return {
@@ -73,8 +83,46 @@ async function getAllFines() {
     return rows;
 }
 
+async function getMyFines(userId) {
 
-async function payFine(fineId) {
+    const [students] = await db.query(
+        `SELECT student_id FROM students WHERE user_id = ?`,
+        [userId]
+    );
+
+    // No linked student profile yet — nothing to show rather than an error.
+    if (students.length === 0) return [];
+
+    const [rows] = await db.query(
+        `
+        SELECT
+            f.fine_id,
+            f.issue_id,
+            b.title,
+            f.fine_type,
+            f.amount,
+            f.reason,
+            f.payment_status,
+            f.paid_date,
+            f.created_at
+        FROM fines f
+        INNER JOIN book_issues bi
+            ON f.issue_id = bi.issue_id
+        INNER JOIN book_copies bc
+            ON bi.copy_id = bc.copy_id
+        INNER JOIN books b
+            ON bc.book_id = b.book_id
+        WHERE f.student_id = ?
+        ORDER BY f.created_at DESC
+        `,
+        [students[0].student_id]
+    );
+
+    return rows;
+}
+
+
+async function payFine(fineId, userId) {
 
     const connection = await db.getConnection();
 
@@ -104,6 +152,12 @@ async function payFine(fineId) {
 
         const fine = fineRows[0];
 
+        // Route is Student-role-gated, but that only proves *a* student is
+        // calling it — this proves it's the student who actually owes it,
+        // so one student can't clear another's balance by guessing an ID.
+        if (fine.user_id !== userId) {
+            throw new Error("You can only pay your own fines");
+        }
 
         if (fine.payment_status === "Paid") {
             throw new Error("Fine is already paid");
@@ -170,5 +224,6 @@ async function payFine(fineId) {
 module.exports = {
     createFine,
     getAllFines,
+    getMyFines,
     payFine
 };

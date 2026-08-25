@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 const createReservation = async (
     book_id,
-    student_id,
+    userId,
     expiry_date
 ) => {
 
@@ -17,15 +17,29 @@ const createReservation = async (
         throw new Error("Book not found");
     }
 
+    // student_id is resolved from the logged-in account, never taken from
+    // the request body — otherwise one student could reserve books "as"
+    // another by simply changing the id in the payload.
     const [students] = await db.query(
-        `SELECT student_id
-         FROM students
-         WHERE student_id = ?`,
-        [student_id]
+        `SELECT s.student_id, u.status AS account_status
+         FROM students s
+         INNER JOIN users u ON s.user_id = u.user_id
+         WHERE s.user_id = ?`,
+        [userId]
     );
 
     if (students.length === 0) {
-        throw new Error("Student not found");
+        throw new Error("No student profile is linked to this account yet");
+    }
+
+    const student_id = students[0].student_id;
+
+    if (students[0].account_status === "Blocked") {
+        throw new Error("This student's account is blocked and cannot make reservations");
+    }
+
+    if (students[0].account_status === "Inactive") {
+        throw new Error("This student's account is inactive and cannot make reservations");
     }
 
     const [existingReservation] = await db.query(
@@ -67,6 +81,35 @@ const getAllReservations = async () => {
         `SELECT *
          FROM reservations
          ORDER BY reservation_id DESC`
+    );
+
+    return rows;
+};
+
+const getMyReservations = async (userId) => {
+
+    const [students] = await db.query(
+        `SELECT student_id FROM students WHERE user_id = ?`,
+        [userId]
+    );
+
+    // No linked student profile yet — nothing to show rather than an error.
+    if (students.length === 0) return [];
+
+    const [rows] = await db.query(
+        `SELECT
+            r.reservation_id,
+            r.book_id,
+            b.title,
+            r.reservation_date,
+            r.expiry_date,
+            r.status
+         FROM reservations r
+         INNER JOIN books b
+             ON r.book_id = b.book_id
+         WHERE r.student_id = ?
+         ORDER BY r.reservation_date DESC`,
+        [students[0].student_id]
     );
 
     return rows;
@@ -151,6 +194,7 @@ const deleteReservation = async (reservation_id) => {
 module.exports = {
     createReservation,
     getAllReservations,
+    getMyReservations,
     getReservationById,
     updateReservation,
     deleteReservation

@@ -1,0 +1,162 @@
+/*
+  Shared design tokens — the single source of truth for color across the
+  whole app. The 4 preserved ZIP pages (Login/StudentDashboard/
+  AdminDashboard/LibraryCatalog, plus LibrarianDashboard which reuses
+  AdminDashboard's CSS) used to keep their own local copies of these same
+  values; those local copies have been removed so every page now inherits
+  from here, which is what makes the theme switcher below able to recolor
+  the entire app instead of just the 9 newer pages.
+*/
+
+:root {
+  --forest: #0e2b21;
+  --forest-deep: #081b15;
+  --forest-panel: #123527;
+  --forest-panel-light: #16402e;
+  --cream: #f3ede1;
+  --gold: #d9a441;
+  --gold-soft: rgba(217, 164, 65, 0.85);
+  --gold-deep: #b9862c;
+  --muted: rgba(243, 237, 225, 0.6);
+  --muted-2: rgba(243, 237, 225, 0.35);
+  --border: rgba(243, 237, 225, 0.12);
+  --border-soft: rgba(243, 237, 225, 0.08);
+  --success: var(--gold);
+  --warning: #e8bd6a;
+  --danger: #e0715f;
+  --info: #b8c5a8;
+  --sage: #b8c5a8;
+
+  /* Raw R,G,B triplets for the same colors, for rgba(var(--x-rgb), alpha)
+     usages (glass backgrounds, hover tints, pulse rings, shadows) that
+     need a variable alpha the hex tokens above can't provide. */
+  --gold-rgb: 217, 164, 65;
+  --cream-rgb: 243, 237, 225;
+  --danger-rgb: 224, 113, 95;
+  --forest-deep-rgb: 8, 27, 21;
+
+  --font-serif: 'Fraunces', serif;
+  --font-sans: 'Manrope', sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.18);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.28);
+  --shadow-gold: 0 10px 24px rgba(var(--gold-rgb), 0.3);
+
+  --sidebar-w: 240px;
+  --sidebar-w-collapsed: 76px;
+  --topbar-h: 72px;
+
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+  Theme system — every theme redefines only the semantic color tokens
+  above (never layout/spacing/radius/shadow tokens, and never touches
+  status colors like --danger/--warning, which stay recognizable across
+  themes). Components never hardcode a color; they reference these
+  tokens, so switching [data-theme] on <html> re-skins the whole app.
+*/
+:root[data-theme='forest'] {
+  --forest: #0e2b21;
+  --forest-deep: #081b15;
+  --forest-panel: #123527;
+  --forest-panel-light: #16402e;
+  --cream: #f3ede1;
+  --gold: #d9a441;
+  --gold-soft: rgba(217, 164, 65, 0.85);
+  --gold-deep: #b9862c;
+  --muted: rgba(243, 237, 225, 0.6);
+  --muted-2: rgba(243, 237, 225, 0.35);
+  --border: rgba(243, 237, 225, 0.12);
+  --border-soft: rgba(243, 237, 225, 0.08);
+  --info: #b8c5a8;
+  --sage: #b8c5a8;
+  --gold-rgb: 217, 164, 65;
+  --cream-rgb: 243, 237, 225;
+  --forest-deep-rgb: 8, 27, 21;
+}
+
+:root[data-theme='mono-blush'] {
+  --forest: #2a0f0a;
+  --forest-deep: #180804;
+  --forest-panel: #3a1810;
+  --forest-panel-light: #472018;
+  --cream: #f4d8d8;
+  --gold: #c09891;
+  --gold-soft: rgba(192, 152, 145, 0.85);
+  --gold-deep: #a17b74;
+  --muted: rgba(244, 216, 216, 0.6);
+  --muted-2: rgba(244, 216, 216, 0.35);
+  --border: rgba(244, 216, 216, 0.14);
+  --border-soft: rgba(244, 216, 216, 0.08);
+  --info: #bea8a7;
+  --sage: #bea8a7;
+  --gold-rgb: 192, 152, 145;
+  --cream-rgb: 244, 216, 216;
+  --forest-deep-rgb: 24, 8, 4;
+}
+
+:root[data-theme='meadow-blush'] {
+  --forest: #24371a;
+  --forest-deep: #16220e;
+  --forest-panel: #2f4522;
+  --forest-panel-light: #38542a;
+  --cream: #eef5df;
+  --gold: #f18fa4;
+  --gold-soft: rgba(241, 143, 164, 0.85);
+  --gold-deep: #d16f85;
+  --muted: rgba(238, 245, 223, 0.6);
+  --muted-2: rgba(238, 245, 223, 0.35);
+  --border: rgba(238, 245, 223, 0.14);
+  --border-soft: rgba(238, 245, 223, 0.08);
+  --info: #bedd8a;
+  --sage: #bedd8a;
+  --gold-rgb: 241, 143, 164;
+  --cream-rgb: 238, 245, 223;
+  --forest-deep-rgb: 22, 34, 14;
+}
+
+:root[data-theme='ember'] {
+  --forest: #201c20;
+  --forest-deep: #161316;
+  --forest-panel: #2b2429;
+  --forest-panel-light: #342c31;
+  --cream: #f5f0ee;
+  --gold: #ff6d29;
+  --gold-soft: rgba(255, 109, 41, 0.85);
+  --gold-deep: #cc5620;
+  --muted: rgba(245, 240, 238, 0.6);
+  --muted-2: rgba(245, 240, 238, 0.35);
+  --border: rgba(245, 240, 238, 0.14);
+  --border-soft: rgba(245, 240, 238, 0.08);
+  --info: #bababa;
+  --sage: #bababa;
+  --gold-rgb: 255, 109, 41;
+  --cream-rgb: 245, 240, 238;
+  --forest-deep-rgb: 22, 19, 22;
+}
+
+:root[data-theme='teal-lagoon'] {
+  --forest: #0a3438;
+  --forest-deep: #06282b;
+  --forest-panel: #0f4247;
+  --forest-panel-light: #135158;
+  --cream: #eafbf7;
+  --gold: #fce688;
+  --gold-soft: rgba(252, 230, 136, 0.85);
+  --gold-deep: #d9c56e;
+  --muted: rgba(234, 251, 247, 0.6);
+  --muted-2: rgba(234, 251, 247, 0.35);
+  --border: rgba(234, 251, 247, 0.14);
+  --border-soft: rgba(234, 251, 247, 0.08);
+  --info: #0d9da4;
+  --sage: #0d9da4;
+  --gold-rgb: 252, 230, 136;
+  --cream-rgb: 234, 251, 247;
+  --forest-deep-rgb: 6, 40, 43;
+}

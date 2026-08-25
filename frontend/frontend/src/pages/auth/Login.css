@@ -1,0 +1,389 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+.lg-page {
+  /* Aliased to the shared theme tokens (styles/tokens.css) rather than
+     hardcoded, so switching themes recolors the login page too. */
+  --lg-forest: var(--forest);
+  --lg-forest-deep: var(--forest-deep);
+  --lg-cream: var(--cream);
+  --lg-gold: var(--gold);
+  --lg-gold-soft: var(--gold-soft);
+  --lg-muted: var(--muted);
+  --lg-border: var(--border);
+
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--lg-forest);
+  font-family: 'Manrope', sans-serif;
+  color: var(--lg-cream);
+}
+
+.lg-art {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  background-size: cover;
+  background-position: right center;
+  background-repeat: no-repeat;
+}
+
+.lg-art-fade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg,
+      var(--lg-forest-deep) 0%,
+      var(--lg-forest-deep) 30%,
+      rgba(var(--forest-deep-rgb), 0.75) 45%,
+      rgba(var(--forest-deep-rgb), 0.25) 58%,
+      transparent 72%
+    );
+}
+
+.lg-topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 48px;
+}
+
+.lg-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lg-logo {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+}
+
+.lg-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.lg-brand-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--lg-cream);
+}
+
+.lg-brand-sub {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--lg-gold-soft);
+  margin-top: 2px;
+}
+
+.lg-topbar-link {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--lg-cream);
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.lg-topbar-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.lg-content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(340px, 480px) 1fr;
+  gap: 40px;
+  padding: 40px 48px 60px;
+  min-height: calc(100vh - 86px);
+  align-items: center;
+}
+
+.lg-form-col {
+  max-width: 460px;
+}
+
+.lg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--lg-border);
+  background: rgba(var(--cream-rgb), 0.04);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--lg-gold-soft);
+  margin-bottom: 26px;
+}
+
+.lg-heading {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 2.6rem;
+  line-height: 1.12;
+  margin: 0 0 16px;
+  color: var(--lg-cream);
+}
+
+.lg-subtext {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--lg-muted);
+  margin: 0 0 34px;
+  max-width: 420px;
+}
+
+.lg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lg-field label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lg-muted);
+}
+
+.lg-role-select {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.lg-role-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--lg-border);
+  background: rgba(var(--cream-rgb), 0.03);
+  color: var(--lg-muted);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.lg-role-btn:hover {
+  border-color: var(--lg-gold-soft);
+  color: var(--lg-cream);
+}
+
+.lg-role-btn.active {
+  background: var(--lg-gold);
+  border-color: var(--lg-gold);
+  color: var(--lg-forest-deep);
+}
+
+.lg-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--lg-border);
+  padding-bottom: 11px;
+  transition: border-color 0.2s ease;
+}
+
+.lg-input-wrap:focus-within {
+  border-color: var(--lg-gold);
+}
+
+.lg-input-wrap svg {
+  color: var(--lg-gold-soft);
+  flex-shrink: 0;
+}
+
+.lg-input-wrap input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--lg-cream);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.94rem;
+}
+
+.lg-input-wrap input::placeholder {
+  color: rgba(var(--cream-rgb), 0.35);
+}
+
+.lg-eye {
+  background: none;
+  border: none;
+  color: var(--lg-muted);
+  cursor: pointer;
+  display: flex;
+  padding: 2px;
+}
+
+.lg-eye:hover {
+  color: var(--lg-cream);
+}
+
+.lg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -4px;
+}
+
+.lg-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--lg-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.lg-remember input {
+  accent-color: var(--lg-gold);
+  width: 14px;
+  height: 14px;
+}
+
+.lg-link {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--lg-cream);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.lg-link:hover {
+  text-decoration: underline;
+}
+
+.lg-error {
+  margin: -6px 0 0;
+  font-size: 0.8rem;
+  color: #ffc9bb;
+  background: rgba(var(--danger-rgb), 0.12);
+  border: 1px solid rgba(var(--danger-rgb), 0.28);
+  padding: 9px 12px;
+  border-radius: 8px;
+}
+
+.lg-submit {
+  margin-top: 6px;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  background: var(--lg-cream);
+  color: var(--lg-forest-deep);
+  font-size: 0.94rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.lg-submit:hover:not(:disabled) {
+  background: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+.lg-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.lg-arrow {
+  transition: transform 0.18s ease;
+}
+
+.lg-submit:hover .lg-arrow {
+  transform: translateX(3px);
+}
+
+.lg-signup {
+  margin: 24px 0 0;
+  font-size: 0.85rem;
+  color: var(--lg-muted);
+}
+
+.lg-signup a {
+  color: var(--lg-cream);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.lg-quote-col {
+  position: relative;
+  z-index: 2;
+  max-width: 520px;
+  justify-self: end;
+  text-align: center;
+  padding-right: 20px;
+}
+
+.lg-quote {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.7rem;
+  line-height: 1.4;
+  color: var(--lg-cream);
+  margin: 0 0 18px;
+}
+
+.lg-cite {
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--lg-gold-soft);
+}
+
+@media (max-width: 980px) {
+  .lg-content {
+    grid-template-columns: 1fr;
+    padding: 30px 26px 50px;
+  }
+
+  .lg-quote-col {
+    display: none;
+  }
+
+  .lg-art {
+    width: 100%;
+    opacity: 0.35;
+  }
+
+  .lg-art-fade {
+    background: linear-gradient(180deg, rgba(var(--forest-deep-rgb), 0.55) 0%, var(--lg-forest-deep) 60%);
+  }
+
+  .lg-heading {
+    font-size: 2.1rem;
+  }
+}

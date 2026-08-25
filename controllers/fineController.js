@@ -28,7 +28,7 @@ async function payFine(req, res) {
             });
         }
 
-        const result = await fineService.payFine(fineId);
+        const result = await fineService.payFine(fineId, req.user.user_id);
 
         return res.status(200).json(result);
 
@@ -60,8 +60,28 @@ async function getAllFines(req, res, next) {
 
     }
 }
+
+async function getMyFines(req, res, next) {
+
+    try {
+
+        const fines = await fineService.getMyFines(req.user.user_id);
+
+        res.status(200).json({
+            success: true,
+            data: fines
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+}
+
 module.exports = {
     createFine,
     getAllFines,
+    getMyFines,
     payFine
 };

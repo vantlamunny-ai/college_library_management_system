@@ -1,0 +1,36 @@
+.status-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--forest-deep);
+  padding: 20px;
+}
+
+.status-card {
+  text-align: center;
+  max-width: 380px;
+}
+
+.status-code {
+  font-family: var(--font-serif);
+  font-size: 4.5rem;
+  font-weight: 600;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.status-card h1 {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  color: var(--cream);
+  margin: 0 0 10px;
+}
+
+.status-card p {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}

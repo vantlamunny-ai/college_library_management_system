@@ -33,8 +33,15 @@ const login = async (req, res, next) => {
 const getCurrentUser = async (req, res, next) => {
   try {
     const user = await authService.getCurrentUser(
-      req.user.id
+      req.user.user_id
     );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -54,7 +61,7 @@ async function forgotPassword(req, res, next) {
 
         const { email } = req.body;
 
-       
+
         if (!email) {
             return res.status(400).json({
                 success: false,
@@ -63,14 +70,19 @@ async function forgotPassword(req, res, next) {
         }
 
         const result =
-            await authService.forgotPassword(email);
+            await authService.requestPasswordReset(email);
 
         res.status(200).json({
             success: true,
-            message: "Password reset link generated successfully",
+            // Deliberately the same message whether or not the email
+            // matched an account — never confirm/deny an email exists.
+            message: "If that email is registered, a password reset link has been sent.",
             data: {
-                resetLink: result.resetLink,
-                expiresAt: result.expiresAt
+                emailSent: result.emailSent,
+                // Only present when no real email was actually sent (no
+                // EMAIL_USER/EMAIL_APP_PASSWORD configured, or the send
+                // failed) — a working fallback instead of a dead end.
+                resetLink: result.resetLink
             }
         });
 
@@ -80,36 +92,33 @@ async function forgotPassword(req, res, next) {
 }
 
 
-
-
 async function resetPassword(req, res, next) {
 
     try {
 
-        const { email } = req.body;
+        const { token } = req.params;
+        const { password } = req.body;
 
-       
-        if (!email) {
-
+        if (!password) {
             return res.status(400).json({
                 success: false,
-                message: "Email is required"
+                message: "A new password is required"
             });
-
         }
-        await authService.forgotPassword(email);
+
+        await authService.resetPasswordWithToken(token, password);
+
         return res.status(200).json({
-
             success: true,
-
-            message:
-                "If the email is registered, a password reset link has been sent."
-
+            message: "Password reset successfully. You can sign in with your new password now."
         });
 
     } catch (error) {
 
-        next(error);
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
 
     }
 }
@@ -119,5 +128,5 @@ module.exports = {
   getCurrentUser,
   forgotPassword,
   resetPassword
-  
+
 };

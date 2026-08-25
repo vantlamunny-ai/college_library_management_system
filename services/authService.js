@@ -4,54 +4,103 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
+const USERNAME_PATTERN = /^[A-Za-z0-9._]+$/;
+
+const VALID_ROLES = ["Admin", "Librarian", "Student"];
+
+// users.username is NOT NULL UNIQUE, but Librarian/Admin self-registration
+// only collects email + password — no username is ever typed for those
+// roles. This derives one from the email's local part so the DB constraint
+// is satisfied without asking for information the form never requested,
+// and de-duplicates against existing usernames (case-insensitively).
+async function generateUsernameFromEmail(email) {
+    const base =
+        (email.split("@")[0] || "user")
+            .replace(/[^A-Za-z0-9._]/g, ".")
+        || "user";
+
+    let candidate = base;
+    let suffix = 1;
+
+    while (true) {
+        const [rows] = await db.query(
+            `SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)`,
+            [candidate]
+        );
+        if (rows.length === 0) return candidate;
+        suffix += 1;
+        candidate = `${base}${suffix}`;
+    }
+}
+
 async function register(userData) {
     const {
         username,
         email,
         password,
-        role,
         status,
         roll_number,
         student_name,
         department,
         year,
         semester,
+        interests,
         phone,
         address,
-        admission_year
+        admission_year,
+        role: requestedRole
     } = userData;
 
-    let formattedRollNumber = roll_number
-        ? roll_number.trim().toUpperCase()
-        : null;
+    // Anyone can pick which role they're registering as — Admin and
+    // Librarian are not hidden behind a hardcoded password or secret.
+    // The only guard is field validation below (a Student still needs a
+    // real roll number in the real format; Librarian/Admin only need a
+    // working email + password).
+    const role = VALID_ROLES.includes(requestedRole) ? requestedRole : "Student";
 
-    if (!username || !email || !password || !role) {
+    if (!email || !password) {
         throw new Error(
-            "Username, email, password and role are required"
+            "Email and password are required"
         );
     }
 
-    if (!["Admin", "Librarian", "Student"].includes(role)) {
-        throw new Error("Invalid role");
-    }
+    let finalUsername;
+    let formattedRollNumber = null;
 
     if (role === "Student") {
-        if (!email) {
-            throw new Error("Email is required for students");
+        if (!username) {
+            throw new Error(
+                "Username is required"
+            );
         }
+
+        if (!USERNAME_PATTERN.test(username)) {
+            throw new Error(
+                "Username may only contain letters, numbers, '.' and '_' — no spaces or other symbols"
+            );
+        }
+
+        finalUsername = username;
+
+        formattedRollNumber = roll_number
+            ? roll_number.trim().toUpperCase()
+            : null;
 
         if (!formattedRollNumber) {
             throw new Error("Roll number is required for students");
         }
 
         const rollNumberPattern =
-    /^[0-9]{2}[A-Z]{2}[0-9][A-Z][A-Z0-9]{4}$/;
+            /^[0-9]{2}[A-Z]{2}[0-9][A-Z][A-Z0-9]{4}$/;
 
         if (!rollNumberPattern.test(formattedRollNumber)) {
             throw new Error(
                 "Invalid roll number format. Example: 25KN1A05CB"
             );
         }
+    } else {
+        // Librarian / Admin — email + password only.
+        finalUsername = await generateUsernameFromEmail(email);
     }
 
     const [existingUser] = await db.query(
@@ -69,22 +118,24 @@ async function register(userData) {
         );
     }
 
-    const [existingUsername] = await db.query(
-        `
-        SELECT user_id
-        FROM users
-        WHERE username = ?
-        `,
-        [username]
-    );
-
-    if (existingUsername.length > 0) {
-        throw new Error(
-            `Username '${username}' already exists`
-        );
-    }
-
     if (role === "Student") {
+        // Case-insensitive so "John.Doe" and "john.doe" are treated as the
+        // same username — consistent, backend-enforced case handling.
+        const [existingUsername] = await db.query(
+            `
+            SELECT user_id
+            FROM users
+            WHERE LOWER(username) = LOWER(?)
+            `,
+            [finalUsername]
+        );
+
+        if (existingUsername.length > 0) {
+            throw new Error(
+                "Username already exists. Please choose another username."
+            );
+        }
+
         const [existingStudent] = await db.query(
             `
             SELECT student_id
@@ -104,69 +155,111 @@ async function register(userData) {
     const hashedPassword =
         await bcrypt.hash(password, 10);
 
-    const [result] = await db.query(
-        `
-        INSERT INTO users
-        (
-            username,
-            email,
-            password,
-            role,
-            status
-        )
-        VALUES (?, ?, ?, ?, ?)
-        `,
-        [
-            username,
-            email,
-            hashedPassword,
-            role,
-            status || "Active"
-        ]
-    );
-
-    const userId = result.insertId;
-
-    if (role === "Student") {
-        await db.query(
+    let userId;
+    try {
+        const [result] = await db.query(
             `
-            INSERT INTO students
+            INSERT INTO users
             (
-                user_id,
-                roll_number,
-                student_name,
-                department,
-                year,
-                semester,
-                phone,
-                address,
-                admission_year
+                username,
+                email,
+                password,
+                role,
+                status
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             `,
             [
-                userId,
-                formattedRollNumber,
-                student_name || username,
-                department || null,
-                year || null,
-                semester || null,
-                phone || null,
-                address || null,
-                admission_year || null
+                finalUsername,
+                email,
+                hashedPassword,
+                role,
+                status || "Active"
             ]
         );
+        userId = result.insertId;
+    } catch (error) {
+        // Defense in depth: the UNIQUE constraint on users.username is what
+        // actually guarantees no two accounts ever collide, even if two
+        // registrations race past the SELECT check above at the same time.
+        if (error.code === "ER_DUP_ENTRY") {
+            if (String(error.sqlMessage).includes("username")) {
+                throw new Error("Username already exists. Please choose another username.");
+            }
+            throw new Error("Email already exists! Please login.");
+        }
+        throw error;
     }
+
+    if (role === "Student") {
+        try {
+            await db.query(
+                `
+                INSERT INTO students
+                (
+                    user_id,
+                    roll_number,
+                    student_name,
+                    department,
+                    year,
+                    semester,
+                    interests,
+                    phone,
+                    address,
+                    admission_year
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `,
+                [
+                    userId,
+                    formattedRollNumber,
+                    student_name || finalUsername,
+                    department || null,
+                    year || null,
+                    semester || null,
+                    interests || null,
+                    phone || null,
+                    address || null,
+                    admission_year || null
+                ]
+            );
+        } catch (error) {
+            // Roll back the orphaned users row rather than leaving a login
+            // with no student profile behind it.
+            await db.query("DELETE FROM users WHERE user_id = ?", [userId]);
+            if (error.code === "ER_DUP_ENTRY") {
+                throw new Error("Roll number already exists");
+            }
+            throw error;
+        }
+    } else if (role === "Librarian") {
+        try {
+            await db.query(
+                `
+                INSERT INTO librarians
+                (user_id, employee_id, librarian_name, status)
+                VALUES (?, ?, ?, 'Active')
+                `,
+                [
+                    userId,
+                    `EMP-${userId}`,
+                    finalUsername
+                ]
+            );
+        } catch (error) {
+            await db.query("DELETE FROM users WHERE user_id = ?", [userId]);
+            throw error;
+        }
+    }
+    // Admin has no secondary profile table — the users row alone is enough.
 
     return {
         user_id: userId,
-        username: username,
+        username: finalUsername,
         email: email,
         role: role,
         status: status || "Active",
-        ...(role === "Student" && {
-            roll_number: formattedRollNumber
-        })
+        roll_number: formattedRollNumber
     };
 }
 
@@ -174,22 +267,27 @@ async function login(userData) {
     const {
         email,
         roll_number,
-        password
+        username,
+        password,
+        role
     } = userData;
 
     const formattedRollNumber = roll_number
         ? roll_number.trim().toUpperCase()
         : null;
 
-    if ((!email && !formattedRollNumber) || !password) {
+    const identifierCount =
+        [email, formattedRollNumber, username].filter(Boolean).length;
+
+    if (identifierCount === 0 || !password) {
         throw new Error(
-            "Email or Roll Number and password are required"
+            "An email, roll number, or username, plus password, are required"
         );
     }
 
-    if (email && formattedRollNumber) {
+    if (identifierCount > 1) {
         throw new Error(
-            "Enter either Email or Roll Number, not both"
+            "Enter only one of: email, roll number, or username"
         );
     }
 
@@ -214,28 +312,27 @@ async function login(userData) {
         WHERE
             u.email = ?
             OR s.roll_number = ?
+            OR u.username = ?
         LIMIT 1
         `,
         [
             email || null,
-            formattedRollNumber || null
+            formattedRollNumber || null,
+            username || null
         ]
     );
 
     if (rows.length === 0) {
         throw new Error(
-            "Invalid email/roll number or password"
+            "Invalid credentials"
         );
     }
 
     const user = rows[0];
 
-    if (user.status !== "Active") {
-        throw new Error(
-            "Account is not active"
-        );
-    }
-
+    // Verify the password before revealing anything about account
+    // state (status, role) — an invalid password should look identical
+    // whether or not the account is blocked/inactive/wrong-role.
     const isMatch =
         await bcrypt.compare(
             password,
@@ -244,7 +341,31 @@ async function login(userData) {
 
     if (!isMatch) {
         throw new Error(
-            "Invalid email/roll number or password"
+            "Invalid credentials"
+        );
+    }
+
+    if (user.status === "Blocked") {
+        throw new Error(
+            "Your account has been blocked. Please contact the library administrator."
+        );
+    }
+
+    if (user.status === "Inactive") {
+        throw new Error(
+            "Your account is inactive. Please contact the library administrator."
+        );
+    }
+
+    if (user.status !== "Active") {
+        throw new Error(
+            "Account is not active"
+        );
+    }
+
+    if (role && role !== user.role) {
+        throw new Error(
+            "The selected role does not match this account. Please choose the correct role and try again."
         );
     }
 
@@ -279,15 +400,23 @@ async function login(userData) {
     };
 }
 
-async function getCurrentUser() {
+async function getCurrentUser(userId) {
     const [rows] = await db.query(
         `
-        SELECT *
+        SELECT
+            user_id,
+            username,
+            email,
+            role,
+            status,
+            created_at
         FROM users
-        `
+        WHERE user_id = ?
+        `,
+        [userId]
     );
 
-    return rows;
+    return rows[0] || null;
 }
 
 function generateResetToken() {
@@ -296,72 +425,30 @@ function generateResetToken() {
         .toString("hex");
 }
 
-async function forgotPassword(email) {
-    if (!email) {
-        throw new Error(
-            "Email is required"
-        );
-    }
+// Real Gmail credentials only exist once someone sets EMAIL_USER +
+// EMAIL_APP_PASSWORD in .env — until then, transporter is never created
+// (creating it with empty auth would just fail loudly on every request).
+const emailConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD);
 
-    const [users] = await db.query(
-        `
-        SELECT user_id, email
-        FROM users
-        WHERE email = ?
-        `,
-        [email]
-    );
-
-    if (users.length === 0) {
-        throw new Error(
-            "Email not found"
-        );
-    }
-
-    const user = users[0];
-
-    const resetToken =
-        generateResetToken();
-
-    const expiresAt =
-        new Date(
-            Date.now() + 15 * 60 * 1000
-        );
-
-    await db.query(
-        `
-        UPDATE users
-        SET
-            reset_token = ?,
-            reset_token_expires = ?
-        WHERE user_id = ?
-        `,
-        [
-            resetToken,
-            expiresAt,
-            user.user_id
-        ]
-    );
-
-    const resetLink =
-        `http://localhost:5173/reset-password/${resetToken}`;
-
-    return {
-        resetLink,
-        expiresAt
-    };
-}
-
-const transporter =
-    nodemailer.createTransport({
+const transporter = emailConfigured
+    ? nodemailer.createTransport({
         service: "gmail",
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_APP_PASSWORD
         }
-    });
+    })
+    : null;
 
-async function resetPassword(email) {
+/**
+ * Step 1 of the reset flow. Always generates and stores a fresh token
+ * (15-minute expiry) if the email matches an account — but never reveals
+ * *whether* it matched, so this can't be used to enumerate registered
+ * emails. When real email credentials are configured it sends the link;
+ * when they aren't, it returns the link directly in the response instead
+ * of silently pretending an email went out.
+ */
+async function requestPasswordReset(email) {
     if (!email) {
         throw new Error(
             "Email is required"
@@ -378,7 +465,7 @@ async function resetPassword(email) {
     );
 
     if (users.length === 0) {
-        return;
+        return { emailSent: false, resetLink: null };
     }
 
     const user = users[0];
@@ -406,8 +493,12 @@ async function resetPassword(email) {
         ]
     );
 
-    const resetLink =
-        `${process.env.RESET_PASSWORD_URL}/${resetToken}`;
+    const baseUrl = process.env.RESET_PASSWORD_URL || "http://localhost:5173/reset-password";
+    const resetLink = `${baseUrl}/${resetToken}`;
+
+    if (!emailConfigured) {
+        return { emailSent: false, resetLink };
+    }
 
     const message = `
 Hello,
@@ -428,19 +519,72 @@ Regards,
 College Library System
 `;
 
-    await transporter.sendMail({
-        from:
-            `"College Library System" <${process.env.EMAIL_USER}>`,
-        to: user.email,
-        subject: "Password Reset Request",
-        text: message
-    });
+    try {
+        await transporter.sendMail({
+            from: `"College Library System" <${process.env.EMAIL_USER}>`,
+            to: user.email,
+            subject: "Password Reset Request",
+            text: message
+        });
+        return { emailSent: true, resetLink: null };
+    } catch (error) {
+        // Real SMTP failure (bad app password, network, etc.) — the token
+        // is already saved, so fall back to handing back the link rather
+        // than leaving the user with no way to reset at all.
+        console.error("Failed to send password reset email:", error.message);
+        return { emailSent: false, resetLink };
+    }
+}
+
+/** Step 2 — consumes the token from the emailed/returned link. */
+async function resetPasswordWithToken(token, newPassword) {
+    if (!token || !newPassword) {
+        throw new Error(
+            "Token and new password are required"
+        );
+    }
+
+    if (newPassword.length < 8) {
+        throw new Error(
+            "Password must be at least 8 characters"
+        );
+    }
+
+    const [users] = await db.query(
+        `
+        SELECT user_id
+        FROM users
+        WHERE reset_token = ?
+          AND reset_token_expires > NOW()
+        `,
+        [token]
+    );
+
+    if (users.length === 0) {
+        throw new Error(
+            "This reset link is invalid or has expired. Please request a new one."
+        );
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await db.query(
+        `
+        UPDATE users
+        SET
+            password = ?,
+            reset_token = NULL,
+            reset_token_expires = NULL
+        WHERE user_id = ?
+        `,
+        [hashedPassword, users[0].user_id]
+    );
 }
 
 module.exports = {
     register,
     login,
     getCurrentUser,
-    forgotPassword,
-    resetPassword
+    requestPasswordReset,
+    resetPasswordWithToken
 };

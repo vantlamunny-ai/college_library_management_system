@@ -36,3 +36,7 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Database / local files (dumps, backups) — but not the actual schema
+# definition, which is real versioned source, not local/generated data.
+*.sql
+!db/schema.sql

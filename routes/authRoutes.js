@@ -14,6 +14,6 @@ router.get("/user",verifyToken,authController.getCurrentUser);
 
 router.post("/forgot-password",authController.forgotPassword);
 
-router.post("/reset-password",authController.resetPassword);
+router.put("/reset-password/:token",authController.resetPassword);
 
 module.exports = router;

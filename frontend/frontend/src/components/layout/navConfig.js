@@ -1,0 +1,35 @@
+// Role-aware sidebar nav, shared by AppLayout for the 9 new pages.
+export const NAV_BY_ROLE = {
+  Student: [
+    { to: '/student/dashboard', label: 'Dashboard', icon: 'ti-layout-grid' },
+    { to: '/library', label: 'Browse Catalog', icon: 'ti-books' },
+    { to: '/due-dates', label: 'Due Dates', icon: 'ti-clock-exclamation' },
+    { to: '/reservations', label: 'Reservations', icon: 'ti-bookmark' },
+    { to: '/fines', label: 'Fines', icon: 'ti-receipt' },
+    { to: '/notifications', label: 'Notifications', icon: 'ti-bell' },
+  ],
+  Librarian: [
+    { to: '/librarian/dashboard', label: 'Dashboard', icon: 'ti-layout-grid' },
+    { to: '/library', label: 'Books', icon: 'ti-books' },
+    { to: '/students', label: 'Students', icon: 'ti-users' },
+    { to: '/circulation', label: 'Circulation', icon: 'ti-transfer' },
+    { to: '/reservations', label: 'Reservations', icon: 'ti-bookmark' },
+    { to: '/due-dates', label: 'Due Dates', icon: 'ti-clock-exclamation' },
+    { to: '/fines', label: 'Fines', icon: 'ti-receipt' },
+    { to: '/lost-damaged', label: 'Lost / Damaged', icon: 'ti-alert-triangle' },
+    { to: '/reports', label: 'Reports', icon: 'ti-chart-bar' },
+    { to: '/notifications', label: 'Notifications', icon: 'ti-bell' },
+  ],
+  Admin: [
+    { to: '/admin/dashboard', label: 'Dashboard', icon: 'ti-layout-grid' },
+    { to: '/library', label: 'Books', icon: 'ti-books' },
+    { to: '/students', label: 'Students', icon: 'ti-users' },
+    { to: '/circulation', label: 'Circulation', icon: 'ti-transfer' },
+    { to: '/reservations', label: 'Reservations', icon: 'ti-bookmark' },
+    { to: '/due-dates', label: 'Due Dates', icon: 'ti-clock-exclamation' },
+    { to: '/fines', label: 'Fines', icon: 'ti-receipt' },
+    { to: '/lost-damaged', label: 'Lost / Damaged', icon: 'ti-alert-triangle' },
+    { to: '/reports', label: 'Reports', icon: 'ti-chart-bar' },
+    { to: '/notifications', label: 'Notifications', icon: 'ti-bell' },
+  ],
+};

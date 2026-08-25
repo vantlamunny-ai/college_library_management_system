@@ -21,6 +21,13 @@ router.get(
 );
 
 router.get(
+    "/my",
+    authMiddleware,
+    roleMiddleware("Student"),
+    reservationController.getMyReservations
+);
+
+router.get(
     "/:id",
     authMiddleware,
     roleMiddleware("Admin", "Librarian"),

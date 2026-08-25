@@ -19,6 +19,31 @@ router.get(
 );
 
 
+// Must be registered before "/:id" — otherwise Express matches "me" as an :id param.
+router.get(
+    "/me",
+    verifyToken,
+    authorizeRoles("Student"),
+    studentController.getMyProfile
+);
+
+
+router.put(
+    "/me/profile",
+    verifyToken,
+    authorizeRoles("Student"),
+    studentController.updateMyProfile
+);
+
+
+router.put(
+    "/me/username",
+    verifyToken,
+    authorizeRoles("Student"),
+    studentController.changeMyUsername
+);
+
+
 router.get(
     "/:id",
     verifyToken,
@@ -40,6 +65,14 @@ router.put(
     verifyToken,
     authorizeRoles("Admin", "Librarian"),
     studentController.updateStudent
+);
+
+
+router.put(
+    "/:id/account-status",
+    verifyToken,
+    authorizeRoles("Admin", "Librarian"),
+    studentController.updateAccountStatus
 );
 
 

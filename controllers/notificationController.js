@@ -24,6 +24,49 @@ async function getMyNotifications(req, res, next) {
     }
 }
 
+async function markAsRead(req, res, next) {
+
+    try {
+
+        const result = await notificationService.markAsRead(
+            req.params.id,
+            req.user.user_id
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Notification marked as read",
+            data: result
+        });
+
+    } catch (error) {
+
+        next(error);
+    }
+}
+
+async function markAllAsRead(req, res, next) {
+
+    try {
+
+        const result = await notificationService.markAllAsRead(
+            req.user.user_id
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "All notifications marked as read",
+            data: result
+        });
+
+    } catch (error) {
+
+        next(error);
+    }
+}
+
 module.exports = {
-    getMyNotifications
+    getMyNotifications,
+    markAsRead,
+    markAllAsRead
 };

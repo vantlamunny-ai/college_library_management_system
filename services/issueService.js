@@ -86,13 +86,15 @@ async function issueBook(issueData) {
         const [students] = await connection.query(
             `
             SELECT
-                student_id,
-                user_id,
-                roll_number,
-                student_name,
-                status
-            FROM students
-            WHERE student_id = ?
+                s.student_id,
+                s.user_id,
+                s.roll_number,
+                s.student_name,
+                s.status,
+                u.status AS account_status
+            FROM students s
+            INNER JOIN users u ON s.user_id = u.user_id
+            WHERE s.student_id = ?
             FOR UPDATE
             `,
             [student_id]
@@ -106,6 +108,20 @@ async function issueBook(issueData) {
 
 
         const student = students[0];
+
+        if (student.account_status === "Blocked") {
+
+            throw new Error(
+                "This student's account is blocked and cannot borrow books"
+            );
+        }
+
+        if (student.account_status !== "Active") {
+
+            throw new Error(
+                "This student's account is not active"
+            );
+        }
 
         if (student.status !== "Active") {
 
@@ -154,6 +170,7 @@ async function issueBook(issueData) {
                 bc.book_id,
                 bc.accession_number,
                 bc.condition_status,
+                bc.availability_status,
 
                 b.title,
                 b.isbn
@@ -182,10 +199,10 @@ async function issueBook(issueData) {
         const copy = copies[0];
 
 
-        if (copy.status !== "Available") {
+        if (copy.availability_status !== "Available") {
 
             throw new Error(
-                `Book copy is currently ${copy.status}`
+                `Book copy is currently ${copy.availability_status}`
             );
         }
 
@@ -306,7 +323,7 @@ async function issueBook(issueData) {
         await connection.query(
             `
             UPDATE book_copies
-            SET status = 'Issued'
+            SET availability_status = 'Issued'
             WHERE copy_id = ?
             `,
             [copy_id]
@@ -328,7 +345,7 @@ async function issueBook(issueData) {
                 student.user_id,
                 "Book Issued",
                 `The book "${copy.title}" has been issued to you. Due date: ${formatDate(dueDate)}`,
-                "Book Issue"
+                "General"
             ]
         );
 

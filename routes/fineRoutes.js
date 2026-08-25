@@ -21,6 +21,13 @@ router.get(
     fineController.getAllFines
 );
 
+router.get(
+    "/my",
+    verifyToken,
+    authorizeRoles("Student"),
+    fineController.getMyFines
+);
+
 router.put(
     "/:fineId",
     verifyToken,

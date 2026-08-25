@@ -56,6 +56,37 @@ async function getStudent(req, res, next) {
 
 
 
+async function getMyProfile(req, res, next) {
+
+    try {
+
+        const student =
+            await studentService.getStudentByUserId(
+                req.user.user_id
+            );
+
+        if (!student) {
+
+            return res.status(404).json({
+                success: false,
+                message: "No student profile is linked to this account yet"
+            });
+
+        }
+
+        res.json({
+            success: true,
+            data: student
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+}
+
+
 async function createStudent(req, res, next) {
 
     try {
@@ -112,6 +143,101 @@ async function updateStudent(req, res, next) {
 }
 
 
+async function updateMyProfile(req, res, next) {
+
+    try {
+
+        // Passed through as-is (not destructured into a new object) so the
+        // service can tell "field omitted" apart from "field explicitly
+        // cleared" — the avatar picker, for instance, only ever sends
+        // profile_picture and must never blank out bio/interests as a side
+        // effect of that.
+        const student =
+            await studentService.updateMyProfile(
+                req.user.user_id,
+                req.body
+            );
+
+        res.json({
+            success: true,
+            message: "Profile updated successfully",
+            data: student
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+}
+
+
+async function changeMyUsername(req, res, next) {
+
+    try {
+
+        const { username } = req.body;
+
+        const student =
+            await studentService.changeUsername(
+                req.user.user_id,
+                username
+            );
+
+        res.json({
+            success: true,
+            message: "Username updated successfully",
+            data: student
+        });
+
+    } catch (error) {
+
+        // Rate-limit / duplicate / validation errors are all user-facing,
+        // expected rejections rather than server faults.
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+}
+
+
+async function updateAccountStatus(req, res, next) {
+
+    try {
+
+        const { status } = req.body;
+
+        const student =
+            await studentService.updateAccountStatus(
+                req.params.id,
+                status
+            );
+
+        if (!student) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Student not found"
+            });
+
+        }
+
+        res.json({
+            success: true,
+            message: "Account status updated successfully",
+            data: student
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+}
+
+
 async function deleteStudent(req, res, next) {
 
     try {
@@ -145,7 +271,11 @@ async function deleteStudent(req, res, next) {
 module.exports = {
     getStudents,
     getStudent,
+    getMyProfile,
     createStudent,
     updateStudent,
+    updateMyProfile,
+    changeMyUsername,
+    updateAccountStatus,
     deleteStudent
 };

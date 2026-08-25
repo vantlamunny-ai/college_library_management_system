@@ -13,10 +13,13 @@ const reportRoutes = require("./routes/reportRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const fineRoutes = require("./routes/fineRoutes");
 const issueRoutes = require("./routes/issueRoutes");
+const librarianRoutes = require("./routes/librarianRoutes");
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+// Default 100kb is too small for a profile-picture data URI (resized
+// client-side to a few hundred KB before it's ever sent).
+app.use(express.json({ limit: "3mb" }));
 
 app.get("/", async (req, res) => {
     try {
@@ -49,6 +52,21 @@ app.use("/reports", reportRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/fines", fineRoutes);
 app.use("/issues", issueRoutes);
+app.use("/librarians", librarianRoutes);
+
+// Central error handler — every controller's `next(error)` lands here.
+// Without this, Express falls back to its default HTML error page, and
+// the frontend (which expects {success, message} JSON) loses the real
+// error message entirely.
+app.use((err, req, res, next) => {
+    console.error(err);
+
+    res.status(err.statusCode || 400).json({
+        success: false,
+        message: err.message || "Something went wrong"
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
