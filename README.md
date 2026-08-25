@@ -183,3 +183,81 @@ Reports include:
                     │       Database       │
                     │        MySQL         │
                     └──────────────────────┘
+```
+
+---
+
+# ⚙️ Getting Started
+
+## Prerequisites
+
+- Node.js (v18+)
+- MySQL Server, running locally
+- npm
+
+## 1. Clone the repository
+
+```bash
+git clone https://github.com/vantlamunny-ai/college_library_management_system
+cd college_library_management_system
+```
+
+## 2. Backend setup
+
+```bash
+npm install
+```
+
+Copy `.env.example` to `.env` and fill in your own values:
+
+```env
+PORT=3000
+JWT_SECRET=your-secret-key
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your-mysql-password
+DB_NAME=college_library_system
+```
+
+`EMAIL_USER`, `EMAIL_APP_PASSWORD`, `RESET_PASSWORD_URL`, and `INITIAL_ADMIN_*` are optional, see the comments in `.env.example` for what each one does. Leave the email fields blank and the forgot-password flow still works, it just returns the reset link directly instead of emailing it.
+
+Load the database schema (this creates the database and every table for you):
+
+```bash
+mysql -u root -p < db/schema.sql
+```
+
+Optional, seeds ~77 real books with real cover images:
+
+```bash
+node db/seed-books.js
+```
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+Runs on `http://localhost:3000` by default.
+
+## 3. Frontend setup
+
+```bash
+cd frontend/frontend
+npm install
+```
+
+Copy `.env.example` to `.env`, the default `VITE_API_BASE_URL=http://localhost:3000` is fine as long as the backend is running on port 3000.
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+Runs on `http://localhost:5173`.
+
+## 4. Create an account
+
+Open `http://localhost:5173`, click **Create an account**, and register as a Student, Librarian, or Admin, registration is self-service for all three roles.
