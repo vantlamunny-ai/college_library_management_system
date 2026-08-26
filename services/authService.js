@@ -552,7 +552,7 @@ async function resetPasswordWithToken(token, newPassword) {
 
     const [users] = await db.query(
         `
-        SELECT user_id
+        SELECT user_id, email
         FROM users
         WHERE reset_token = ?
           AND reset_token_expires > NOW()
@@ -566,6 +566,7 @@ async function resetPasswordWithToken(token, newPassword) {
         );
     }
 
+    const user = users[0];
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await db.query(
@@ -577,8 +578,31 @@ async function resetPasswordWithToken(token, newPassword) {
             reset_token_expires = NULL
         WHERE user_id = ?
         `,
-        [hashedPassword, users[0].user_id]
+        [hashedPassword, user.user_id]
     );
+
+    // Best-effort confirmation, so if this genuinely wasn't the account
+    // owner resetting it, they get a heads-up — never let a failed send
+    // here undo the password change that already succeeded.
+    if (emailConfigured) {
+        try {
+            await transporter.sendMail({
+                from: `"College Library System" <${process.env.EMAIL_USER}>`,
+                to: user.email,
+                subject: "Password Reset Confirmation",
+                text: `Hello,
+
+Your password was just reset for your College Library System account.
+
+If you didn't do this, contact the library administrator right away.
+
+Regards,
+College Library System`
+            });
+        } catch (error) {
+            console.error("Failed to send password reset confirmation email:", error.message);
+        }
+    }
 }
 
 module.exports = {
