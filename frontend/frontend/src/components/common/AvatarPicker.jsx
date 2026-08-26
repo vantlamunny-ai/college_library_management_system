@@ -129,6 +129,8 @@ export function AvatarPicker({ open, onClose, currentPicture, name, onSaved }) {
               key={preset.id}
               type="button"
               title={preset.label}
+              aria-label={`Use the ${preset.label} avatar`}
+              aria-pressed={isCurrent}
               disabled={saving}
               onClick={() => handlePresetClick(preset)}
               style={{

@@ -19,6 +19,7 @@ export function AppLayout({ search, actions, children }) {
 
   return (
     <div className={`clms-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
+      <a href="#clms-main-content" className="clms-skip-link">Skip to main content</a>
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((v) => !v)}
@@ -28,7 +29,7 @@ export function AppLayout({ search, actions, children }) {
       {mobileOpen && <div className="clms-sidebar-backdrop" onClick={() => setMobileOpen(false)} />}
       <div className="clms-main-col">
         <Topbar search={search} actions={actions} onMenuClick={() => setMobileOpen(true)} />
-        <main className="clms-main" key={location.pathname}>
+        <main className="clms-main" id="clms-main-content" tabIndex={-1} key={location.pathname}>
           <div className="clms-page-transition">{children}</div>
         </main>
       </div>

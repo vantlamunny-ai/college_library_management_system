@@ -70,6 +70,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="sdg">
+      <a href="#sdg-main-content" className="clms-skip-link">Skip to main content</a>
       {mobileOpen && <div className="sdg-sidebar-backdrop" onClick={() => setMobileOpen(false)} />}
       <aside className={`sdg-sidebar ${mobileOpen ? 'is-open' : ''}`}>
         <button className="sdg-sidebar-close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
@@ -90,7 +91,7 @@ export default function StudentDashboard() {
         <a className="sdg-nav-item logout" onClick={handleLogout}><i className="ti ti-logout" />Logout</a>
       </aside>
 
-      <main className="sdg-main">
+      <main className="sdg-main" id="sdg-main-content" tabIndex={-1}>
         <header className="sdg-topbar">
           <button className="sdg-menu-btn" onClick={() => setMobileOpen(true)} aria-label="Open menu">
             <i className="ti ti-menu-2" />

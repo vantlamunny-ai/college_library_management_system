@@ -17,12 +17,14 @@ export function ThemeSwitcher({ itemClassName = 'clms-nav-item', labelClassName 
   return (
     <div className="clms-theme-switcher">
       {open && (
-        <div className="clms-theme-popup">
+        <div className="clms-theme-popup" role="menu" aria-label="Choose a theme">
           <div className="clms-theme-popup-label">Theme</div>
           {themes.map((t) => (
             <button
               key={t.id}
               type="button"
+              role="menuitemradio"
+              aria-checked={t.id === theme}
               className={`clms-theme-option ${t.id === theme ? 'active' : ''}`}
               onClick={() => { setTheme(t.id); setOpen(false) }}
             >
@@ -41,6 +43,8 @@ export function ThemeSwitcher({ itemClassName = 'clms-nav-item', labelClassName 
         className={itemClassName}
         onClick={() => setOpen((v) => !v)}
         title="Change theme"
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
         <i className="ti ti-palette" />
         <span className={labelClassName}>Theme</span>

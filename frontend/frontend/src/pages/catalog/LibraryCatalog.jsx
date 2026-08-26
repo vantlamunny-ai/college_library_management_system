@@ -178,6 +178,7 @@ export default function LibraryCatalog() {
 
   return (
     <div className="lcg">
+      <a href="#lcg-main-content" className="clms-skip-link">Skip to main content</a>
       {mobileOpen && <div className="lcg-sidebar-backdrop" onClick={() => setMobileOpen(false)} />}
       <aside className={`lcg-sidebar ${mobileOpen ? 'is-open' : ''}`}>
         <button className="lcg-sidebar-close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
@@ -197,7 +198,7 @@ export default function LibraryCatalog() {
         <a className="lcg-nav-item logout" onClick={handleLogout}><i className="ti ti-logout" />Logout</a>
       </aside>
 
-      <main className="lcg-main">
+      <main className="lcg-main" id="lcg-main-content" tabIndex={-1}>
         <header className="lcg-header">
           <button className="lcg-menu-btn" onClick={() => setMobileOpen(true)} aria-label="Open menu" style={{ marginBottom: 8 }}>
             <i className="ti ti-menu-2" />

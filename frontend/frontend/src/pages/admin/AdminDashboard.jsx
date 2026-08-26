@@ -95,6 +95,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="ag">
+      <a href="#ag-main-content" className="clms-skip-link">Skip to main content</a>
       {mobileOpen && <div className="ag-sidebar-backdrop" onClick={() => setMobileOpen(false)} />}
       <aside className={`ag-sidebar ${mobileOpen ? 'is-open' : ''}`}>
         <button className="ag-sidebar-close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
@@ -115,7 +116,7 @@ export default function AdminDashboard() {
         <a className="ag-nav-item logout" onClick={handleLogout}><i className="ti ti-logout" />Logout</a>
       </aside>
 
-      <main className="ag-main">
+      <main className="ag-main" id="ag-main-content" tabIndex={-1}>
         <header className="ag-topbar">
           <button className="ag-menu-btn" onClick={() => setMobileOpen(true)} aria-label="Open menu">
             <i className="ti ti-menu-2" />
