@@ -5,6 +5,8 @@
   /* Colors come from the shared theme tokens (styles/tokens.css) — no
      local overrides here so switching themes recolors this page too. */
 
+  animation: clms-page-in 0.45s var(--ease-standard);
+
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
@@ -14,7 +16,7 @@
 }
 
 .ag-sidebar {
-  background: #071810;
+  background: var(--forest-deep);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -81,7 +83,7 @@
 .ag-tile.tone-ink { background: linear-gradient(135deg, var(--forest-panel), var(--forest-deep)); color: var(--cream); border: 1px solid var(--border); }
 
 .ag-tile-top { display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; font-weight: 700; opacity: 0.85; margin-bottom: 14px; }
-.ag-tile-top i { font-size: 19px; opacity: 0.8; }
+.ag-tile-top i { font-size: 19px; opacity: 0.8; display: inline-block; animation: clms-icon-pop 0.5s var(--ease-bounce) both; }
 .ag-tile-value { font-size: 1.55rem; font-weight: 800; line-height: 1; margin-bottom: 6px; }
 .ag-tile-sub { font-size: 0.72rem; opacity: 0.8; }
 
@@ -96,7 +98,7 @@
 
 .ag-bar-chart { display: flex; align-items: flex-end; gap: 14px; height: 160px; padding-top: 10px; }
 .ag-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
-.ag-bar { width: 100%; max-width: 30px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--gold), #9c711f); min-height: 6px; transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.ag-bar { width: 100%; max-width: 30px; border-radius: 8px 8px 3px 3px; background: linear-gradient(180deg, var(--gold), var(--gold-deep)); min-height: 6px; transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
 .ag-bar-label { font-size: 0.72rem; color: var(--muted); margin-top: 8px; }
 
 .ag-donut-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }

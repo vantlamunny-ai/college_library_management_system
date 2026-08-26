@@ -134,6 +134,74 @@ button {
   }
 }
 
+/* Fade-up used for staggered grid/list/card entrances, pair with
+   .clms-stagger > * (nth-child delays below) or an inline animation-delay. */
+@keyframes clms-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Applied broadly to every stat-card row across the app (shared 9-page
+   layout and the 3 preserved dashboards/catalog use different class
+   names for the same grid pattern), plus anything opting in via
+   .clms-stagger explicitly. */
+.clms-stagger > *,
+.clms-stat-row > *,
+.sdg-stat-row > *,
+.ag-tile-row > *,
+.lcg-stat-strip > *,
+.lcg-grid > * {
+  animation: clms-fade-up 0.5s var(--ease-standard) both;
+}
+
+.clms-stagger > *:nth-child(1), .clms-stat-row > *:nth-child(1), .sdg-stat-row > *:nth-child(1), .ag-tile-row > *:nth-child(1), .lcg-grid > *:nth-child(1), .lcg-stat-strip > *:nth-child(1) { animation-delay: 0.03s; }
+.clms-stagger > *:nth-child(2), .clms-stat-row > *:nth-child(2), .sdg-stat-row > *:nth-child(2), .ag-tile-row > *:nth-child(2), .lcg-grid > *:nth-child(2), .lcg-stat-strip > *:nth-child(2) { animation-delay: 0.07s; }
+.clms-stagger > *:nth-child(3), .clms-stat-row > *:nth-child(3), .sdg-stat-row > *:nth-child(3), .ag-tile-row > *:nth-child(3), .lcg-grid > *:nth-child(3), .lcg-stat-strip > *:nth-child(3) { animation-delay: 0.11s; }
+.clms-stagger > *:nth-child(4), .clms-stat-row > *:nth-child(4), .sdg-stat-row > *:nth-child(4), .ag-tile-row > *:nth-child(4), .lcg-grid > *:nth-child(4), .lcg-stat-strip > *:nth-child(4) { animation-delay: 0.15s; }
+.clms-stagger > *:nth-child(5), .clms-stat-row > *:nth-child(5), .sdg-stat-row > *:nth-child(5), .ag-tile-row > *:nth-child(5), .lcg-grid > *:nth-child(5), .lcg-stat-strip > *:nth-child(5) { animation-delay: 0.19s; }
+.clms-stagger > *:nth-child(6), .clms-stat-row > *:nth-child(6), .sdg-stat-row > *:nth-child(6), .ag-tile-row > *:nth-child(6), .lcg-grid > *:nth-child(6), .lcg-stat-strip > *:nth-child(6) { animation-delay: 0.23s; }
+.clms-stagger > *:nth-child(7), .clms-stat-row > *:nth-child(7), .sdg-stat-row > *:nth-child(7), .ag-tile-row > *:nth-child(7), .lcg-grid > *:nth-child(7), .lcg-stat-strip > *:nth-child(7) { animation-delay: 0.27s; }
+.clms-stagger > *:nth-child(8), .clms-stat-row > *:nth-child(8), .sdg-stat-row > *:nth-child(8), .ag-tile-row > *:nth-child(8), .lcg-grid > *:nth-child(8), .lcg-stat-strip > *:nth-child(8) { animation-delay: 0.31s; }
+.clms-stagger > *:nth-child(n+9), .clms-stat-row > *:nth-child(n+9), .sdg-stat-row > *:nth-child(n+9), .ag-tile-row > *:nth-child(n+9), .lcg-grid > *:nth-child(n+9), .lcg-stat-strip > *:nth-child(n+9) { animation-delay: 0.35s; }
+
+/* Slow drifting ambient glow, used behind the login art for a bit of
+   motion-graphics polish without any JS or extra assets. */
+@keyframes clms-glow-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(3%, -4%) scale(1.08); }
+  66% { transform: translate(-2%, 3%) scale(0.96); }
+}
+
+/* Diagonal light sweep across a button on hover, layered via ::after so
+   it never disturbs the button's own background/gradient. */
+.clms-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.clms-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.55s var(--ease-standard);
+  pointer-events: none;
+}
+
+.clms-shine:hover::after {
+  left: 130%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

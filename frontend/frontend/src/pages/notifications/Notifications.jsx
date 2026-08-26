@@ -3,10 +3,9 @@ import { PageHeader } from '../../components/common/PageHeader'
 import { Panel } from '../../components/common/Panel'
 import { Toolbar, FilterChips } from '../../components/common/FilterBar'
 import { EmptyState } from '../../components/common/EmptyState'
-import { ErrorState, UnavailableState } from '../../components/common/ErrorState'
+import { ErrorState } from '../../components/common/ErrorState'
 import { SkeletonRows } from '../../components/common/LoadingSkeleton'
 import { useApi, useMutation } from '../../hooks/useApi'
-import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import * as notificationService from '../../services/notificationService'
 import { relativeTime, formatDateTime } from '../../utils/date'
@@ -20,15 +19,12 @@ const TYPE_ICON = {
 }
 
 export default function Notifications() {
-  const { role } = useAuth()
   const toast = useToast()
-  const isStudent = role === 'Student'
   const [filter, setFilter] = useState('All')
 
   const { data: notifications, loading, error, refetch } = useApi(
     () => notificationService.getMyNotifications(),
-    [],
-    { enabled: isStudent }
+    []
   )
 
   const [markReadRun] = useMutation((id) => notificationService.markNotificationRead(id))
@@ -65,20 +61,6 @@ export default function Notifications() {
     } catch (err) {
       toast.error(err?.message || 'Could not mark all as read.')
     }
-  }
-
-  if (!isStudent) {
-    return (
-      <div>
-        <PageHeader title="Notifications" subtitle="Library alerts and account updates." />
-        <Panel>
-          <UnavailableState
-            title="Notifications aren't available for your role yet"
-            message="GET /notifications/my is restricted to the Student role on the current backend — there's no notifications endpoint for Admin/Librarian accounts yet."
-          />
-        </Panel>
-      </div>
-    )
   }
 
   return (

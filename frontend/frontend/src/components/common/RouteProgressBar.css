@@ -1,0 +1,22 @@
+.clms-route-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold), var(--cream));
+  box-shadow: 0 0 12px rgba(var(--gold-rgb), 0.7), 0 0 4px rgba(var(--gold-rgb), 0.9);
+  z-index: 9999;
+  opacity: 0;
+  transition: width 0.25s ease-out, opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.clms-route-bar.is-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clms-route-bar {
+    display: none;
+  }
+}

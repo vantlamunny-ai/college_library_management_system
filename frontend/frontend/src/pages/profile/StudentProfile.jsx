@@ -20,6 +20,7 @@ export default function StudentProfile() {
 
   const [avatarOpen, setAvatarOpen] = useState(false)
   const [usernameOpen, setUsernameOpen] = useState(false)
+  const [academicOpen, setAcademicOpen] = useState(false)
 
   const [bio, setBio] = useState('')
   const [interests, setInterests] = useState('')
@@ -99,6 +100,21 @@ export default function StudentProfile() {
           <div className="clms-row-card-field"><span>Semester</span><span>{studentProfile.semester || '—'}</span></div>
           <div className="clms-row-card-field"><span>Member since</span><span>{formatDate(studentProfile.created_at)}</span></div>
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+          <p className="clms-hint" style={{ margin: 0 }}>
+            {studentProfile.academic_changes_used} of 2 branch/year/semester edits used this year
+            {studentProfile.academic_changes_reset_at ? ` · resets ${formatDate(studentProfile.academic_changes_reset_at)}` : ''}.
+          </p>
+          <button
+            className="clms-btn clms-btn-ghost clms-btn-small"
+            disabled={studentProfile.academic_changes_remaining <= 0}
+            onClick={() => setAcademicOpen(true)}
+            title={studentProfile.academic_changes_remaining <= 0 ? "You've used all your changes for this year" : undefined}
+          >
+            <i className="ti ti-edit" /> Edit
+          </button>
+        </div>
       </Panel>
 
       <Panel title="Username">
@@ -168,6 +184,13 @@ export default function StudentProfile() {
         onClose={() => setUsernameOpen(false)}
         remaining={studentProfile.username_changes_remaining}
       />
+
+      <AcademicInfoModal
+        open={academicOpen}
+        onClose={() => setAcademicOpen(false)}
+        remaining={studentProfile.academic_changes_remaining}
+        current={{ department: studentProfile.department, year: studentProfile.year, semester: studentProfile.semester }}
+      />
     </div>
   )
 }
@@ -222,6 +245,88 @@ function ChangeUsernameModal({ open, onClose, remaining }) {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 6 }}>
           <button type="button" className="clms-btn clms-btn-ghost" onClick={handleClose}>Cancel</button>
           <button type="submit" className="clms-btn clms-btn-primary" disabled={state.loading || !value}>
+            {state.loading && <span className="clms-spinner" />} Save
+          </button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+function AcademicInfoModal({ open, onClose, remaining, current }) {
+  const toast = useToast()
+  const { reloadStudentProfile } = useAuth()
+  const [department, setDepartment] = useState(current.department || '')
+  const [year, setYear] = useState(current.year || '')
+  const [semester, setSemester] = useState(current.semester || '')
+  const [error, setError] = useState('')
+  const [run, state] = useMutation((payload) => studentService.updateMyAcademicInfo(payload))
+
+  function handleClose() {
+    setDepartment(current.department || '')
+    setYear(current.year || '')
+    setSemester(current.semester || '')
+    setError('')
+    onClose()
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setError('')
+    try {
+      await run({ department, year, semester })
+      await reloadStudentProfile()
+      toast.success('Academic info updated.')
+      onClose()
+    } catch (err) {
+      const message = err?.message || 'Could not update your academic info.'
+      setError(message)
+      toast.error(message)
+    }
+  }
+
+  return (
+    <Modal open={open} title="Edit branch, year & semester" onClose={handleClose}>
+      <form onSubmit={handleSubmit}>
+        <p className="clms-hint" style={{ marginTop: -4 }}>{remaining} change{remaining === 1 ? '' : 's'} left this year.</p>
+        <div className="clms-field">
+          <label>Branch / Department</label>
+          <input
+            className="clms-input"
+            placeholder="e.g. Computer Science"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            autoFocus
+          />
+        </div>
+        <div className="clms-field-row">
+          <div className="clms-field">
+            <label>Year</label>
+            <input
+              className="clms-input"
+              type="number"
+              min="1"
+              max="6"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+            />
+          </div>
+          <div className="clms-field">
+            <label>Semester</label>
+            <input
+              className="clms-input"
+              type="number"
+              min="1"
+              max="12"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+            />
+          </div>
+        </div>
+        {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', margin: '-4px 0 10px' }}>{error}</p>}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 6 }}>
+          <button type="button" className="clms-btn clms-btn-ghost" onClick={handleClose}>Cancel</button>
+          <button type="submit" className="clms-btn clms-btn-primary" disabled={state.loading}>
             {state.loading && <span className="clms-spinner" />} Save
           </button>
         </div>

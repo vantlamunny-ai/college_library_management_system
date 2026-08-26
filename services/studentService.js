@@ -15,6 +15,8 @@ const STUDENT_SELECT_FIELDS = `
             s.bio,
             s.interests,
             s.profile_picture,
+            s.academic_change_count,
+            s.academic_change_period_start,
             s.created_at,
 
             u.username,
@@ -38,7 +40,7 @@ async function getAllStudents() {
         ORDER BY s.student_id DESC
     `);
 
-    return rows.map(withUsernameChangeStatus);
+    return rows.map(withChangeStatus);
 }
 
 
@@ -55,7 +57,7 @@ async function getStudentById(studentId) {
         WHERE s.student_id = ?
     `, [studentId]);
 
-    return rows[0] ? withUsernameChangeStatus(rows[0]) : null;
+    return rows[0] ? withChangeStatus(rows[0]) : null;
 }
 
 
@@ -72,7 +74,7 @@ async function getStudentByUserId(userId) {
         WHERE s.user_id = ?
     `, [userId]);
 
-    return rows[0] ? withUsernameChangeStatus(rows[0]) : null;
+    return rows[0] ? withChangeStatus(rows[0]) : null;
 }
 
 
@@ -319,30 +321,45 @@ async function deleteStudent(studentId) {
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._]+$/;
 const MAX_USERNAME_CHANGES_PER_YEAR = 7;
+const MAX_ACADEMIC_CHANGES_PER_YEAR = 2;
 const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
+function isWindowExpired(periodStart) {
+    return !periodStart || Date.now() - new Date(periodStart).getTime() >= YEAR_MS;
+}
+
 /**
- * Turns the raw username_change_count/period_start columns into what the
- * UI actually needs — a display never has to re-derive the "has the
- * window expired" logic itself, since that's also what changeUsername()
- * enforces server-side. A window with no changes yet, or one whose year
- * has elapsed, always reports the full allowance.
+ * Turns raw <thing>_change_count/period_start columns into what the UI
+ * actually needs, a display never has to re-derive the "has the window
+ * expired" logic itself, that's the same thing changeUsername() /
+ * updateAcademicInfo() enforce server-side. A window with no changes yet,
+ * or one whose year has elapsed, always reports the full allowance.
+ * `prefix` picks the output key names, e.g. "username_changes" gives
+ * back username_changes_used / _remaining / _reset_at.
  */
-function usernameChangeStatus(count, periodStart) {
-    const expired = !periodStart || Date.now() - new Date(periodStart).getTime() >= YEAR_MS;
+function rateLimitStatus(count, periodStart, maxPerYear, prefix) {
+    const expired = isWindowExpired(periodStart);
     const used = expired ? 0 : count;
     return {
-        username_changes_used: used,
-        username_changes_remaining: MAX_USERNAME_CHANGES_PER_YEAR - used,
-        username_changes_reset_at: expired || !periodStart
+        [`${prefix}_used`]: used,
+        [`${prefix}_remaining`]: maxPerYear - used,
+        [`${prefix}_reset_at`]: expired || !periodStart
             ? null
             : new Date(new Date(periodStart).getTime() + YEAR_MS).toISOString().slice(0, 10),
     };
 }
 
-function withUsernameChangeStatus(row) {
-    const { username_change_count, username_change_period_start, ...rest } = row;
-    return { ...rest, ...usernameChangeStatus(username_change_count, username_change_period_start) };
+function withChangeStatus(row) {
+    const {
+        username_change_count, username_change_period_start,
+        academic_change_count, academic_change_period_start,
+        ...rest
+    } = row;
+    return {
+        ...rest,
+        ...rateLimitStatus(username_change_count, username_change_period_start, MAX_USERNAME_CHANGES_PER_YEAR, "username_changes"),
+        ...rateLimitStatus(academic_change_count, academic_change_period_start, MAX_ACADEMIC_CHANGES_PER_YEAR, "academic_changes"),
+    };
 }
 
 /** Self-service profile edit — bio, interests, and profile picture only. */
@@ -410,7 +427,7 @@ async function changeUsername(userId, newUsername) {
         throw new Error("That's already your username");
     }
 
-    const status = usernameChangeStatus(current.username_change_count, current.username_change_period_start);
+    const status = rateLimitStatus(current.username_change_count, current.username_change_period_start, MAX_USERNAME_CHANGES_PER_YEAR, "username_changes");
 
     if (status.username_changes_remaining <= 0) {
         throw new Error(
@@ -427,8 +444,7 @@ async function changeUsername(userId, newUsername) {
         throw new Error("Username already exists. Please choose another username.");
     }
 
-    const windowExpired = !current.username_change_period_start
-        || Date.now() - new Date(current.username_change_period_start).getTime() >= YEAR_MS;
+    const windowExpired = isWindowExpired(current.username_change_period_start);
     const newCount = windowExpired ? 1 : current.username_change_count + 1;
     const newPeriodStart = windowExpired ? new Date() : current.username_change_period_start;
 
@@ -449,12 +465,56 @@ async function changeUsername(userId, newUsername) {
     return getStudentByUserId(userId);
 }
 
+/**
+ * Self-service edit of year/semester/branch (department), rate-limited to
+ * 2 per rolling year, same windowing rule as changeUsername() just with a
+ * lower cap since academic details shouldn't be flipping constantly.
+ */
+async function updateAcademicInfo(userId, academicData) {
+
+    const { department, year, semester } = academicData;
+
+    const [students] = await db.query(
+        `SELECT academic_change_count, academic_change_period_start
+         FROM students WHERE user_id = ?`,
+        [userId]
+    );
+
+    if (students.length === 0) {
+        throw new Error("No student profile is linked to this account yet");
+    }
+
+    const current = students[0];
+    const status = rateLimitStatus(current.academic_change_count, current.academic_change_period_start, MAX_ACADEMIC_CHANGES_PER_YEAR, "academic_changes");
+
+    if (status.academic_changes_remaining <= 0) {
+        throw new Error(
+            `You've used all ${MAX_ACADEMIC_CHANGES_PER_YEAR} changes to your year, semester, or branch allowed this year. You can change it again after ${status.academic_changes_reset_at}.`
+        );
+    }
+
+    const windowExpired = isWindowExpired(current.academic_change_period_start);
+    const newCount = windowExpired ? 1 : current.academic_change_count + 1;
+    const newPeriodStart = windowExpired ? new Date() : current.academic_change_period_start;
+
+    await db.query(
+        `UPDATE students
+         SET department = ?, year = ?, semester = ?,
+             academic_change_count = ?, academic_change_period_start = ?
+         WHERE user_id = ?`,
+        [department || null, year || null, semester || null, newCount, newPeriodStart, userId]
+    );
+
+    return getStudentByUserId(userId);
+}
+
 module.exports = {
     getAllStudents,
     getStudentById,
     getStudentByUserId,
     createStudent,
     updateStudent,
+    updateAcademicInfo,
     updateAccountStatus,
     updateMyProfile,
     changeUsername,

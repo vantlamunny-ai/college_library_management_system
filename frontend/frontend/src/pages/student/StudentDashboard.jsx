@@ -9,6 +9,7 @@ import { daysUntil, countdownParts, groupByMonth, formatDate } from '../../utils
 import { formatCurrency } from '../../utils/format'
 import { StatusBadge } from '../../components/common/StatusBadge'
 import { Avatar } from '../../components/common/Avatar'
+import { ThemeSwitcher } from '../../components/common/ThemeSwitcher'
 import * as reservationService from '../../services/reservationService'
 import * as fineService from '../../services/fineService'
 import './StudentDashboard.css'
@@ -85,6 +86,7 @@ export default function StudentDashboard() {
           <a className="sdg-nav-item" onClick={() => navigate('/fines')}><i className="ti ti-receipt" />Fines</a>
           <a className="sdg-nav-item" onClick={() => navigate('/notifications')}><i className="ti ti-bell" />Notifications</a>
         </nav>
+        <ThemeSwitcher itemClassName="sdg-nav-item" />
         <a className="sdg-nav-item logout" onClick={handleLogout}><i className="ti ti-logout" />Logout</a>
       </aside>
 

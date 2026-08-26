@@ -20,6 +20,7 @@ export const ENDPOINTS = {
     me: '/students/me',
     meProfile: '/students/me/profile',
     meUsername: '/students/me/username',
+    meAcademic: '/students/me/academic',
     accountStatus: (id) => `/students/${id}/account-status`,
   },
   issues: {

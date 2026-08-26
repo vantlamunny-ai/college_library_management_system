@@ -1,5 +1,5 @@
 const issueService =
-    require("../Services/issueService");
+    require("../services/issueService");
 
 async function issueBook(req, res, next) {
 

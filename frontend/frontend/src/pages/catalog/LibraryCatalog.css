@@ -5,6 +5,8 @@
   /* Colors come from the shared theme tokens (styles/tokens.css) — no
      local overrides here so switching themes recolors this page too. */
 
+  animation: clms-page-in 0.45s var(--ease-standard);
+
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
@@ -14,7 +16,7 @@
 }
 
 .lcg-sidebar {
-  background: #071810;
+  background: var(--forest-deep);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -66,6 +68,7 @@
 .lcg-glass-tile-icon {
   width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
   font-size: 17px; flex-shrink: 0; z-index: 1; background: rgba(var(--gold-rgb), 0.18); color: var(--gold);
+  position: relative; animation: clms-icon-pop 0.5s var(--ease-bounce) both;
 }
 .lcg-glass-tile-value { font-size: 1.24rem; font-weight: 800; color: var(--cream); line-height: 1.1; z-index: 1; position: relative; }
 .lcg-glass-tile-label { font-size: 0.76rem; font-weight: 700; color: var(--cream); margin-top: 3px; z-index: 1; position: relative; }
@@ -106,15 +109,29 @@
 .lcg-book-card {
   background: var(--forest-panel); border: 1px solid var(--border); border-radius: 16px; padding: 12px;
   cursor: pointer; text-align: left; font: inherit; position: relative;
-  transition: box-shadow 0.25s ease, border-color 0.2s ease, transform 0.12s ease;
+  transition: box-shadow 0.25s ease, border-color 0.2s ease, transform 0.25s var(--ease-bounce);
   transform-style: preserve-3d;
 }
 .lcg-book-card:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(var(--gold-rgb), 0.25), 0 0 30px rgba(var(--gold-rgb), 0.12);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(var(--gold-rgb), 0.3), 0 0 36px rgba(var(--gold-rgb), 0.16);
   z-index: 2;
-  border-color: rgba(var(--gold-rgb), 0.35);
+  border-color: rgba(var(--gold-rgb), 0.4);
+  /* transform itself is driven inline (tilt + scale together, JS-computed
+     from cursor position), this rule only owns shadow/border on hover */
 }
 .lcg-book-card.selected { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(var(--gold-rgb), 0.3); }
+
+/* Cursor-following glow, position comes from --spot-x/--spot-y set inline
+   from the mousemove handler, so the highlight tracks the pointer. */
+.lcg-book-spotlight {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--spot-x) var(--spot-y), rgba(var(--gold-rgb), 0.28), transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+  animation: clms-fade-in 0.15s ease;
+}
 
 .lcg-ribbon {
   position: absolute; top: 8px; left: 8px; z-index: 3; font-size: 0.6rem; font-weight: 800;
@@ -128,12 +145,12 @@
   position: relative; height: 132px; border-radius: 12px; overflow: hidden;
   display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
 }
-.tone-1 .lcg-book-cover, .lcg-detail-cover.tone-1 { background: linear-gradient(150deg, var(--gold), #9c711f); }
-.tone-2 .lcg-book-cover, .lcg-detail-cover.tone-2 { background: linear-gradient(150deg, var(--sage), #6f7d5f); }
+.tone-1 .lcg-book-cover, .lcg-detail-cover.tone-1 { background: linear-gradient(150deg, var(--gold), var(--gold-deep)); }
+.tone-2 .lcg-book-cover, .lcg-detail-cover.tone-2 { background: linear-gradient(150deg, var(--sage), var(--sage-deep)); }
 .tone-3 .lcg-book-cover, .lcg-detail-cover.tone-3 { background: linear-gradient(150deg, var(--forest-panel), var(--forest-deep)); }
 .tone-4 .lcg-book-cover, .lcg-detail-cover.tone-4 { background: linear-gradient(150deg, var(--danger), #a3402f); }
 .tone-5 .lcg-book-cover, .lcg-detail-cover.tone-5 { background: linear-gradient(150deg, var(--warning), var(--gold-deep)); }
-.tone-6 .lcg-book-cover, .lcg-detail-cover.tone-6 { background: linear-gradient(150deg, #6f8a63, var(--forest-panel)); }
+.tone-6 .lcg-book-cover, .lcg-detail-cover.tone-6 { background: linear-gradient(150deg, var(--sage), var(--forest-panel)); }
 
 .lcg-book-cover-icon { font-size: 34px; color: rgba(255, 255, 255, 0.4); }
 
@@ -167,8 +184,8 @@
 .lcg-book-meta-author { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
 
 .lcg-chip { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.64rem; font-weight: 700; }
-.lcg-chip-success { background: rgba(var(--gold-rgb), 0.25); color: #f0d6a0; border: 1px solid rgba(var(--gold-rgb), 0.4); }
-.lcg-chip-warning { background: rgba(var(--gold-rgb), 0.3); color: #f0d6a0; border: 1px solid rgba(var(--gold-rgb), 0.4); }
+.lcg-chip-success { background: rgba(var(--gold-rgb), 0.25); color: var(--gold); border: 1px solid rgba(var(--gold-rgb), 0.4); }
+.lcg-chip-warning { background: rgba(var(--gold-rgb), 0.3); color: var(--gold); border: 1px solid rgba(var(--gold-rgb), 0.4); }
 .lcg-chip-danger { background: rgba(var(--danger-rgb), 0.3); color: #ffc9bb; border: 1px solid rgba(var(--danger-rgb), 0.45); }
 
 .lcg-scroll-fade {

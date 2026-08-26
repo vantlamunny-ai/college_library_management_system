@@ -1,11 +1,10 @@
 /*
-  Shared design tokens — the single source of truth for color across the
-  whole app. The 4 preserved ZIP pages (Login/StudentDashboard/
-  AdminDashboard/LibraryCatalog, plus LibrarianDashboard which reuses
-  AdminDashboard's CSS) used to keep their own local copies of these same
-  values; those local copies have been removed so every page now inherits
-  from here, which is what makes the theme switcher below able to recolor
-  the entire app instead of just the 9 newer pages.
+  Shared design tokens, single source of truth for color across the whole
+  app. The 4 preserved ZIP pages (Login/StudentDashboard/AdminDashboard/
+  LibraryCatalog, plus LibrarianDashboard which reuses AdminDashboard's
+  CSS) used to keep their own local copies of these same values, those
+  local copies have been removed so every page now inherits from here,
+  which is what lets the theme switcher recolor the entire app.
 */
 
 :root {
@@ -26,10 +25,11 @@
   --danger: #e0715f;
   --info: #b8c5a8;
   --sage: #b8c5a8;
+  --sage-deep: #6f7d5f;
 
-  /* Raw R,G,B triplets for the same colors, for rgba(var(--x-rgb), alpha)
+  /* raw r,g,b triplets for the same colors, for rgba(var(--x-rgb), alpha)
      usages (glass backgrounds, hover tints, pulse rings, shadows) that
-     need a variable alpha the hex tokens above can't provide. */
+     need a variable alpha the hex tokens above can't provide */
   --gold-rgb: 217, 164, 65;
   --cream-rgb: 243, 237, 225;
   --danger-rgb: 224, 113, 95;
@@ -52,16 +52,23 @@
   --topbar-h: 72px;
 
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /*
-  Theme system — every theme redefines only the semantic color tokens
+  Theme system. Every theme redefines only the semantic color tokens
   above (never layout/spacing/radius/shadow tokens, and never touches
   status colors like --danger/--warning, which stay recognizable across
-  themes). Components never hardcode a color; they reference these
+  themes). Components never hardcode a color, they reference these
   tokens, so switching [data-theme] on <html> re-skins the whole app.
+
+  Selector is plain [data-theme='x'] (not scoped to :root) on purpose,
+  that's what lets a specific subtree (Login page) pin its own theme by
+  carrying the attribute itself, overriding whatever's set globally on
+  <html>, while the global switch still works the same way since <html>
+  is an element too.
 */
-:root[data-theme='forest'] {
+[data-theme='forest'] {
   --forest: #0e2b21;
   --forest-deep: #081b15;
   --forest-panel: #123527;
@@ -76,12 +83,13 @@
   --border-soft: rgba(243, 237, 225, 0.08);
   --info: #b8c5a8;
   --sage: #b8c5a8;
+  --sage-deep: #6f7d5f;
   --gold-rgb: 217, 164, 65;
   --cream-rgb: 243, 237, 225;
   --forest-deep-rgb: 8, 27, 21;
 }
 
-:root[data-theme='mono-blush'] {
+[data-theme='mono-blush'] {
   --forest: #2a0f0a;
   --forest-deep: #180804;
   --forest-panel: #3a1810;
@@ -96,12 +104,13 @@
   --border-soft: rgba(244, 216, 216, 0.08);
   --info: #bea8a7;
   --sage: #bea8a7;
+  --sage-deep: #8a6f6e;
   --gold-rgb: 192, 152, 145;
   --cream-rgb: 244, 216, 216;
   --forest-deep-rgb: 24, 8, 4;
 }
 
-:root[data-theme='meadow-blush'] {
+[data-theme='meadow-blush'] {
   --forest: #24371a;
   --forest-deep: #16220e;
   --forest-panel: #2f4522;
@@ -116,12 +125,13 @@
   --border-soft: rgba(238, 245, 223, 0.08);
   --info: #bedd8a;
   --sage: #bedd8a;
+  --sage-deep: #8aab52;
   --gold-rgb: 241, 143, 164;
   --cream-rgb: 238, 245, 223;
   --forest-deep-rgb: 22, 34, 14;
 }
 
-:root[data-theme='ember'] {
+[data-theme='ember'] {
   --forest: #201c20;
   --forest-deep: #161316;
   --forest-panel: #2b2429;
@@ -136,12 +146,13 @@
   --border-soft: rgba(245, 240, 238, 0.08);
   --info: #bababa;
   --sage: #bababa;
+  --sage-deep: #7a7a7a;
   --gold-rgb: 255, 109, 41;
   --cream-rgb: 245, 240, 238;
   --forest-deep-rgb: 22, 19, 22;
 }
 
-:root[data-theme='teal-lagoon'] {
+[data-theme='teal-lagoon'] {
   --forest: #0a3438;
   --forest-deep: #06282b;
   --forest-panel: #0f4247;
@@ -156,6 +167,7 @@
   --border-soft: rgba(234, 251, 247, 0.08);
   --info: #0d9da4;
   --sage: #0d9da4;
+  --sage-deep: #0a7278;
   --gold-rgb: 252, 230, 136;
   --cream-rgb: 234, 251, 247;
   --forest-deep-rgb: 6, 40, 43;

@@ -9,6 +9,7 @@ import * as issueService from '../../services/issueService'
 import * as reservationService from '../../services/reservationService'
 import { BookFormModal } from '../../components/books/BookFormModal'
 import { BookCover } from '../../components/books/BookCover'
+import { ThemeSwitcher } from '../../components/common/ThemeSwitcher'
 import './LibraryCatalog.css'
 
 function availabilityState(book) {
@@ -25,7 +26,8 @@ function toneFor(id) {
 
 function BookCard({ book, selected, onSelect }) {
   const cardRef = useRef(null)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const [tilt, setTilt] = useState({ x: 0, y: 0, mx: 50, my: 50 })
+  const [hovering, setHovering] = useState(false)
 
   const handleMouseMove = (e) => {
     const el = cardRef.current
@@ -33,9 +35,17 @@ function BookCard({ book, selected, onSelect }) {
     const rect = el.getBoundingClientRect()
     const px = (e.clientX - rect.left) / rect.width - 0.5
     const py = (e.clientY - rect.top) / rect.height - 0.5
-    setTilt({ x: py * -8, y: px * 10 })
+    setTilt({
+      x: py * -16,
+      y: px * 18,
+      mx: ((e.clientX - rect.left) / rect.width) * 100,
+      my: ((e.clientY - rect.top) / rect.height) * 100,
+    })
   }
-  const handleMouseLeave = () => setTilt({ x: 0, y: 0 })
+  const handleMouseLeave = () => {
+    setHovering(false)
+    setTilt({ x: 0, y: 0, mx: 50, my: 50 })
+  }
   const state = availabilityState(book)
   const tone = toneFor(book.book_id)
 
@@ -44,10 +54,16 @@ function BookCard({ book, selected, onSelect }) {
       ref={cardRef}
       className={`lcg-book-card tone-${tone} ${selected ? 'selected' : ''}`}
       onClick={() => onSelect(book)}
+      onMouseEnter={() => setHovering(true)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={{ transform: `perspective(700px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}
+      style={{
+        transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(${hovering ? 1.08 : 1})`,
+        '--spot-x': `${tilt.mx}%`,
+        '--spot-y': `${tilt.my}%`,
+      }}
     >
+      {hovering && <span className="lcg-book-spotlight" />}
       <div className="lcg-book-cover">
         <BookCover src={book.cover_image} alt={book.title} />
         <span className="lcg-book-cover-shine" />
@@ -177,6 +193,7 @@ export default function LibraryCatalog() {
           <a className="lcg-nav-item" onClick={() => navigate('/fines')}><i className="ti ti-receipt" />Fines</a>
           {isStaff && <a className="lcg-nav-item" onClick={() => navigate('/reports')}><i className="ti ti-chart-bar" />Reports</a>}
         </nav>
+        <ThemeSwitcher itemClassName="lcg-nav-item" />
         <a className="lcg-nav-item logout" onClick={handleLogout}><i className="ti ti-logout" />Logout</a>
       </aside>
 

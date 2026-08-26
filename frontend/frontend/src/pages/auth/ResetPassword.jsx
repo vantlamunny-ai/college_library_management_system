@@ -40,7 +40,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="lg-page">
+    <div className="lg-page" data-theme="forest">
       <div className="lg-art" style={{ backgroundImage: `url(${bookshelf})` }} aria-hidden="true" />
       <div className="lg-art-fade" aria-hidden="true" />
 

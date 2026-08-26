@@ -11,7 +11,7 @@ const verifyToken = require("../middleware/authMiddleware");
 router.get(
     "/my",
     verifyToken,
-    authorizeRoles("Student"),
+    authorizeRoles("Student", "Librarian", "Admin"),
     notificationController.getMyNotifications
 );
 

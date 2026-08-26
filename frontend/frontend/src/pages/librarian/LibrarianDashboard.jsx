@@ -10,6 +10,7 @@ import * as reportService from '../../services/reportService'
 import { formatDate, dueStatus } from '../../utils/date'
 import { formatCurrency, initials } from '../../utils/format'
 import { StatusBadge } from '../../components/common/StatusBadge'
+import { ThemeSwitcher } from '../../components/common/ThemeSwitcher'
 // Reuses the Admin dashboard's visual system (same sidebar/topbar/tile/panel
 // classes) so this looks like it was always part of the same application,
 // without duplicating ~250 lines of identical CSS.
@@ -79,6 +80,7 @@ export default function LibrarianDashboard() {
           <a className="ag-nav-item" onClick={() => navigate('/lost-damaged')}><i className="ti ti-alert-triangle" />Lost / Damaged</a>
           <a className="ag-nav-item" onClick={() => navigate('/reports')}><i className="ti ti-chart-bar" />Reports</a>
         </nav>
+        <ThemeSwitcher itemClassName="ag-nav-item" />
         <a className="ag-nav-item logout" onClick={handleLogout}><i className="ti ti-logout" />Logout</a>
       </aside>
 

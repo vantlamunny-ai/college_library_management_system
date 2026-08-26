@@ -5,6 +5,8 @@
   /* Colors come from the shared theme tokens (styles/tokens.css) — no
      local overrides here so switching themes recolors this page too. */
 
+  animation: clms-page-in 0.45s var(--ease-standard);
+
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
@@ -14,7 +16,7 @@
 }
 
 .sdg-sidebar {
-  background: #071810;
+  background: var(--forest-deep);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -186,7 +188,7 @@
 .sdg-profile-role { font-size: 0.74rem; color: var(--muted); }
 
 .sdg-hero {
-  background: linear-gradient(135deg, var(--forest-panel), #0a2419);
+  background: linear-gradient(135deg, var(--forest-panel), var(--forest-deep));
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 30px 32px;
@@ -392,6 +394,8 @@
   justify-content: center;
   font-size: 19px;
   flex-shrink: 0;
+  position: relative;
+  animation: clms-icon-pop 0.5s var(--ease-bounce) both;
 }
 
 .sdg-stat-icon.tone-a { background: rgba(var(--gold-rgb), 0.15); color: var(--gold); }
@@ -501,7 +505,7 @@
   width: 100%;
   max-width: 30px;
   border-radius: 8px 8px 3px 3px;
-  background: linear-gradient(180deg, var(--gold), #9c711f);
+  background: linear-gradient(180deg, var(--gold), var(--gold-deep));
   min-height: 6px;
   transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }

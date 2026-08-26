@@ -44,6 +44,14 @@ router.put(
 );
 
 
+router.put(
+    "/me/academic",
+    verifyToken,
+    authorizeRoles("Student"),
+    studentController.updateMyAcademicInfo
+);
+
+
 router.get(
     "/:id",
     verifyToken,

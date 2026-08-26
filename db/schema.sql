@@ -46,6 +46,10 @@ CREATE TABLE IF NOT EXISTS students (
     -- before it ever reaches the backend) — never a bare filesystem path,
     -- since this backend has no file-upload/static-serving infrastructure.
     profile_picture MEDIUMTEXT NULL,
+    -- Self-service year/semester/branch edits are rate-limited to 2 per
+    -- rolling year, same windowing rule as username_change_count above.
+    academic_change_count INT NOT NULL DEFAULT 0,
+    academic_change_period_start DATE NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );

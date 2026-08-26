@@ -21,7 +21,7 @@
 }
 
 .clms-sidebar {
-  background: #071810;
+  background: var(--forest-deep);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;

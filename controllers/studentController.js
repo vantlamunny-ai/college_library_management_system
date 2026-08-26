@@ -203,6 +203,36 @@ async function changeMyUsername(req, res, next) {
 }
 
 
+async function updateMyAcademicInfo(req, res, next) {
+
+    try {
+
+        const { department, year, semester } = req.body;
+
+        const student =
+            await studentService.updateAcademicInfo(
+                req.user.user_id,
+                { department, year, semester }
+            );
+
+        res.json({
+            success: true,
+            message: "Academic info updated successfully",
+            data: student
+        });
+
+    } catch (error) {
+
+        // Rate-limit / validation errors are user-facing, not server faults.
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+}
+
+
 async function updateAccountStatus(req, res, next) {
 
     try {
@@ -276,6 +306,7 @@ module.exports = {
     updateStudent,
     updateMyProfile,
     changeMyUsername,
+    updateMyAcademicInfo,
     updateAccountStatus,
     deleteStudent
 };

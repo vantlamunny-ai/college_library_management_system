@@ -41,6 +41,11 @@ export function changeMyUsername(username) {
   return apiClient.put(ENDPOINTS.students.meUsername, { username });
 }
 
+/** Student-only — year/semester/branch, rate-limited to 2 changes per rolling year (enforced server-side). */
+export function updateMyAcademicInfo(payload) {
+  return apiClient.put(ENDPOINTS.students.meAcademic, payload);
+}
+
 export function deleteStudent(id) {
   return apiClient.delete(ENDPOINTS.students.byId(id));
 }

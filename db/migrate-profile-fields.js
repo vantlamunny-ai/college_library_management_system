@@ -31,6 +31,8 @@ async function run() {
     await addColumnIfMissing("students", "bio", "TEXT NULL");
     await addColumnIfMissing("students", "interests", "VARCHAR(500) NULL");
     await addColumnIfMissing("students", "profile_picture", "MEDIUMTEXT NULL");
+    await addColumnIfMissing("students", "academic_change_count", "INT NOT NULL DEFAULT 0");
+    await addColumnIfMissing("students", "academic_change_period_start", "DATE NULL");
     console.log("Migration complete.");
     process.exit(0);
 }

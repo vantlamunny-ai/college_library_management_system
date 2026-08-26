@@ -3,7 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { AppRoutes } from './routes/AppRoutes'
-import { ThemeSwitcher } from './components/common/ThemeSwitcher'
+import { RouteProgressBar } from './components/common/RouteProgressBar'
 import './styles/global.css'
 
 export default function App() {
@@ -12,8 +12,8 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <ToastProvider>
+            <RouteProgressBar />
             <AppRoutes />
-            <ThemeSwitcher />
           </ToastProvider>
         </AuthProvider>
       </ThemeProvider>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import logo from '../../assets/nri-logo-white.png'
 import bookshelf from '../../assets/bookshelf-green.png'
@@ -17,6 +17,18 @@ const ROLE_HOME = {
 const SIGNUP_ROLES = ['Student', 'Librarian', 'Admin']
 
 export default function Login() {
+  // Drives the curtain-reveal intro by actually removing it from the DOM
+  // once it's done, rather than trusting animation-fill-mode alone to
+  // keep it visually out of the way forever — a CSS-only version of this
+  // could restart (re-render, fast refresh, anything remounting the
+  // component) and get stuck covering half the page since the "moved
+  // away" state was never more than a transform, not a real removal.
+  const [showCurtain, setShowCurtain] = useState(true)
+  useEffect(() => {
+    const t = setTimeout(() => setShowCurtain(false), 1100)
+    return () => clearTimeout(t)
+  }, [])
+
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -151,13 +163,23 @@ export default function Login() {
   }
 
   return (
-    <div className="lg-page">
+    <div className="lg-page" data-theme="forest">
+      {showCurtain && (
+        <>
+          <div className="lg-curtain lg-curtain-left" aria-hidden="true" />
+          <div className="lg-curtain lg-curtain-right" aria-hidden="true" />
+        </>
+      )}
+      <div className="lg-glow lg-glow-1" aria-hidden="true" />
+      <div className="lg-glow lg-glow-2" aria-hidden="true" />
       <div className="lg-art" style={{ backgroundImage: `url(${bookshelf})` }} aria-hidden="true" />
       <div className="lg-art-fade" aria-hidden="true" />
 
       <header className="lg-topbar">
         <div className="lg-brand">
-          <img src={logo} alt="NRI University" className="lg-logo" />
+          <span className="lg-logo-wrap">
+            <img src={logo} alt="NRI University" className="lg-logo" />
+          </span>
           <div className="lg-brand-text">
             <span className="lg-brand-title">Library</span>
             <span className="lg-brand-sub">Access Portal</span>
@@ -166,14 +188,14 @@ export default function Login() {
       </header>
 
       <main className="lg-content">
-        <div className="lg-form-col">
+        <div className="lg-form-col clms-stagger">
           <span className="lg-badge">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2L12 16.4 5.7 21l2.3-7.2-6-4.6h7.6z" /></svg>
             Member access &middot; NRI Central Library
           </span>
 
           <h1 className="lg-heading">
-            Welcome back,<br />reader.
+            Welcome back,<br /><span className="lg-heading-shine">reader.</span>
           </h1>
           <p className="lg-subtext">
             Sign in with your library account to renew titles, hold reservations and enter the digital archive.
@@ -230,7 +252,7 @@ export default function Login() {
 
             {error && <p className="lg-error" role="alert">{error}</p>}
 
-            <button type="submit" className="lg-submit" disabled={loading}>
+            <button type="submit" className="lg-submit clms-shine" disabled={loading}>
               {loading ? 'Signing in…' : (<>Sign in <span className="lg-arrow">&rarr;</span></>)}
             </button>
           </form>

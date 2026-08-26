@@ -1,0 +1,82 @@
+/* self contained on purpose, imported directly by ThemeSwitcher.jsx so it
+   works no matter which page/sidebar embeds the component, the preserved
+   pages don't all share the same global stylesheets */
+
+.clms-theme-switcher {
+  position: relative;
+  width: 100%;
+}
+
+.clms-theme-popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 210px;
+  background: var(--forest-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 10px;
+  z-index: 60;
+  animation: clms-theme-pop-in 0.18s var(--ease-standard);
+}
+
+@keyframes clms-theme-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.clms-theme-popup-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 2px 8px 6px;
+}
+
+.clms-theme-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--cream);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.clms-theme-option:hover {
+  background: rgba(var(--cream-rgb), 0.06);
+}
+
+.clms-theme-option.active {
+  background: rgba(var(--gold-rgb), 0.15);
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.clms-theme-swatch-row {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.clms-theme-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}

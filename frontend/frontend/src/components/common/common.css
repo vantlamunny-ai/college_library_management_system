@@ -158,7 +158,13 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  animation: clms-fade-in 0.3s var(--ease-standard);
+  transition: transform 0.25s var(--ease-bounce), box-shadow 0.25s ease, border-color 0.2s ease;
+}
+
+.clms-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+  border-color: rgba(var(--gold-rgb), 0.3);
 }
 
 .clms-stat-icon {
@@ -172,6 +178,28 @@
   flex-shrink: 0;
   background: rgba(var(--gold-rgb), 0.15);
   color: var(--gold);
+  position: relative;
+  animation: clms-icon-pop 0.5s var(--ease-bounce) both;
+}
+
+.clms-stat-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid rgba(var(--gold-rgb), 0.6);
+  animation: clms-icon-ring 0.7s var(--ease-standard) both;
+}
+
+@keyframes clms-icon-pop {
+  0% { transform: scale(0.3) rotate(-25deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(6deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes clms-icon-ring {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.7); }
 }
 
 .clms-stat-icon.tone-danger { background: rgba(var(--danger-rgb), 0.15); color: var(--danger); }

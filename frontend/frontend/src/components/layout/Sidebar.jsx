@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import logo from '../../assets/nri-logo-white.png';
 import { NAV_BY_ROLE } from './navConfig';
 import { useAuth } from '../../context/AuthContext';
+import { ThemeSwitcher } from '../common/ThemeSwitcher';
 
 export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }) {
   const { role, logout } = useAuth();
@@ -44,6 +45,8 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }) {
           </NavLink>
         ))}
       </nav>
+
+      <ThemeSwitcher itemClassName="clms-nav-item" labelClassName="clms-nav-label" />
 
       <button className="clms-nav-item logout" onClick={handleLogout} title="Logout">
         <i className="ti ti-logout" />
