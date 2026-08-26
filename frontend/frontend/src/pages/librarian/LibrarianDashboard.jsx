@@ -134,11 +134,11 @@ export default function LibrarianDashboard() {
 
         <section className="ag-grid-2">
           <button className="ag-panel" style={{ textAlign: 'left', cursor: 'pointer', border: 'none' }} onClick={() => navigate('/circulation')}>
-            <div className="ag-panel-head"><h2><i className="ti ti-transfer" style={{ marginRight: 8, color: 'var(--gold)' }} />Issue or return a book</h2></div>
+            <div className="ag-panel-head"><h2><i className="ti ti-transfer" style={{ marginRight: 8, color: 'var(--gold-text)' }} />Issue or return a book</h2></div>
             <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--muted)' }}>Jump to Circulation Management to process a loan or return.</p>
           </button>
           <button className="ag-panel" style={{ textAlign: 'left', cursor: 'pointer', border: 'none' }} onClick={() => navigate('/lost-damaged')}>
-            <div className="ag-panel-head"><h2><i className="ti ti-alert-triangle" style={{ marginRight: 8, color: 'var(--gold)' }} />Report lost or damaged</h2></div>
+            <div className="ag-panel-head"><h2><i className="ti ti-alert-triangle" style={{ marginRight: 8, color: 'var(--gold-text)' }} />Report lost or damaged</h2></div>
             <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--muted)' }}>{lostDamaged.length} incident{lostDamaged.length === 1 ? '' : 's'} on record.</p>
           </button>
         </section>

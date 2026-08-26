@@ -27,6 +27,17 @@
   --sage: #b8c5a8;
   --sage-deep: #6f7d5f;
 
+  /* text-safe siblings: --gold/--info/--sage stay tuned for use as fills
+     (buttons, tiles, badge backgrounds), while --forest-deep doubles as
+     the page background. On a dark theme those same values already work
+     fine as text too, but a light theme needs its accent/status colors
+     darkened to stay readable as text on a bright page — these three
+     tokens give every component a stable name for "text version of the
+     accent" that doesn't change meaning between dark and light. */
+  --accent-ink: #081b15;
+  --gold-text: var(--gold);
+  --info-text: var(--info);
+
   /* raw r,g,b triplets for the same colors, for rgba(var(--x-rgb), alpha)
      usages (glass backgrounds, hover tints, pulse rings, shadows) that
      need a variable alpha the hex tokens above can't provide */
@@ -84,6 +95,9 @@
   --info: #b8c5a8;
   --sage: #b8c5a8;
   --sage-deep: #6f7d5f;
+  --accent-ink: #081b15;
+  --gold-text: #d9a441;
+  --info-text: #b8c5a8;
   --gold-rgb: 217, 164, 65;
   --cream-rgb: 243, 237, 225;
   --forest-deep-rgb: 8, 27, 21;
@@ -105,6 +119,9 @@
   --info: #bea8a7;
   --sage: #bea8a7;
   --sage-deep: #8a6f6e;
+  --accent-ink: #180804;
+  --gold-text: #c09891;
+  --info-text: #bea8a7;
   --gold-rgb: 192, 152, 145;
   --cream-rgb: 244, 216, 216;
   --forest-deep-rgb: 24, 8, 4;
@@ -126,6 +143,9 @@
   --info: #bedd8a;
   --sage: #bedd8a;
   --sage-deep: #8aab52;
+  --accent-ink: #16220e;
+  --gold-text: #f18fa4;
+  --info-text: #bedd8a;
   --gold-rgb: 241, 143, 164;
   --cream-rgb: 238, 245, 223;
   --forest-deep-rgb: 22, 34, 14;
@@ -147,6 +167,9 @@
   --info: #bababa;
   --sage: #bababa;
   --sage-deep: #7a7a7a;
+  --accent-ink: #161316;
+  --gold-text: #ff6d29;
+  --info-text: #bababa;
   --gold-rgb: 255, 109, 41;
   --cream-rgb: 245, 240, 238;
   --forest-deep-rgb: 22, 19, 22;
@@ -168,6 +191,9 @@
   --info: #0d9da4;
   --sage: #0d9da4;
   --sage-deep: #0a7278;
+  --accent-ink: #06282b;
+  --gold-text: #fce688;
+  --info-text: #0d9da4;
   --gold-rgb: 252, 230, 136;
   --cream-rgb: 234, 251, 247;
   --forest-deep-rgb: 6, 40, 43;
@@ -189,6 +215,9 @@
   --info: #7fa8bf;
   --sage: #7fa8bf;
   --sage-deep: #547c8f;
+  --accent-ink: #071620;
+  --gold-text: #a9def9;
+  --info-text: #7fa8bf;
   --gold-rgb: 169, 222, 249;
   --cream-rgb: 241, 250, 254;
   --forest-deep-rgb: 7, 22, 32;
@@ -210,7 +239,212 @@
   --info: #a4c3b2;
   --sage: #a4c3b2;
   --sage-deep: #6f8a7a;
+  --accent-ink: #0e1f19;
+  --gold-text: #ffb7c3;
+  --info-text: #a4c3b2;
   --gold-rgb: 255, 183, 195;
   --cream-rgb: 245, 237, 233;
   --forest-deep-rgb: 14, 31, 25;
 }
+
+/*
+  Light siblings of the 7 themes above. Same accent identity per family,
+  inverted for a bright background: --forest-deep/--cream swap roles (page
+  bg becomes light, primary text becomes dark ink), panel tones become
+  light steps instead of dark ones, and --gold/--info stay at their
+  original (fill) brightness for buttons/tiles/badges while --gold-text/
+  --info-text/--accent-ink carry darker, contrast-checked values for use
+  as text on the now-bright surfaces. --danger/--warning also get darker
+  overrides here since the originals were tuned for a dark background.
+*/
+
+[data-theme='forest-light'] {
+  --forest: #e6ddc4;
+  --forest-deep: #f6f3ea;
+  --forest-panel: #e6ddc4;
+  --forest-panel-light: #d8cba8;
+  --cream: #081b15;
+  --gold: #d9a441;
+  --gold-soft: rgba(125, 81, 16, 0.85);
+  --gold-deep: #b9862c;
+  --gold-text: #7d5110;
+  --accent-ink: #081b15;
+  --muted: rgba(8, 27, 21, 0.72);
+  --muted-2: rgba(8, 27, 21, 0.52);
+  --border: rgba(8, 27, 21, 0.18);
+  --border-soft: rgba(8, 27, 21, 0.12);
+  --info: #b8c5a8;
+  --sage: #b8c5a8;
+  --sage-deep: #6f7d5f;
+  --info-text: #3f5230;
+  --danger: #a5341f;
+  --warning: #8a5a0a;
+  --danger-rgb: 165, 52, 31;
+  --gold-rgb: 217, 164, 65;
+  --cream-rgb: 8, 27, 21;
+  --forest-deep-rgb: 246, 243, 234;
+}
+
+[data-theme='mono-blush-light'] {
+  --forest: #ecd6cc;
+  --forest-deep: #fbf2ef;
+  --forest-panel: #ecd6cc;
+  --forest-panel-light: #dcbcae;
+  --cream: #180804;
+  --gold: #c09891;
+  --gold-soft: rgba(125, 63, 55, 0.85);
+  --gold-deep: #a17b74;
+  --gold-text: #7d3f37;
+  --accent-ink: #180804;
+  --muted: rgba(24, 8, 4, 0.72);
+  --muted-2: rgba(24, 8, 4, 0.52);
+  --border: rgba(24, 8, 4, 0.18);
+  --border-soft: rgba(24, 8, 4, 0.12);
+  --info: #bea8a7;
+  --sage: #bea8a7;
+  --sage-deep: #8a6f6e;
+  --info-text: #6b4a48;
+  --danger: #a5341f;
+  --warning: #8a5a0a;
+  --danger-rgb: 165, 52, 31;
+  --gold-rgb: 192, 152, 145;
+  --cream-rgb: 24, 8, 4;
+  --forest-deep-rgb: 251, 242, 239;
+}
+
+[data-theme='meadow-blush-light'] {
+  --forest: #e2e8c5;
+  --forest-deep: #f8faf0;
+  --forest-panel: #e2e8c5;
+  --forest-panel-light: #d0daa6;
+  --cream: #16220e;
+  --gold: #f18fa4;
+  --gold-soft: rgba(168, 38, 95, 0.85);
+  --gold-deep: #d16f85;
+  --gold-text: #a8265f;
+  --accent-ink: #16220e;
+  --muted: rgba(22, 34, 14, 0.78);
+  --muted-2: rgba(22, 34, 14, 0.56);
+  --border: rgba(22, 34, 14, 0.18);
+  --border-soft: rgba(22, 34, 14, 0.12);
+  --info: #bedd8a;
+  --sage: #bedd8a;
+  --sage-deep: #8aab52;
+  --info-text: #3f5a15;
+  --danger: #a5341f;
+  --warning: #8a5a0a;
+  --danger-rgb: 165, 52, 31;
+  --gold-rgb: 241, 143, 164;
+  --cream-rgb: 22, 34, 14;
+  --forest-deep-rgb: 248, 250, 240;
+}
+
+[data-theme='ember-light'] {
+  --forest: #e7d8d2;
+  --forest-deep: #f8f4f2;
+  --forest-panel: #e7d8d2;
+  --forest-panel-light: #d6bfb6;
+  --cream: #161316;
+  --gold: #ff6d29;
+  --gold-soft: rgba(160, 58, 14, 0.85);
+  --gold-deep: #cc5620;
+  --gold-text: #a03a0e;
+  --accent-ink: #161316;
+  --muted: rgba(22, 19, 22, 0.72);
+  --muted-2: rgba(22, 19, 22, 0.52);
+  --border: rgba(22, 19, 22, 0.18);
+  --border-soft: rgba(22, 19, 22, 0.12);
+  --info: #bababa;
+  --sage: #bababa;
+  --sage-deep: #7a7a7a;
+  --info-text: #565656;
+  --danger: #a5341f;
+  --warning: #8a5a0a;
+  --danger-rgb: 165, 52, 31;
+  --gold-rgb: 255, 109, 41;
+  --cream-rgb: 22, 19, 22;
+  --forest-deep-rgb: 248, 244, 242;
+}
+
+[data-theme='teal-lagoon-light'] {
+  --forest: #c8e8dd;
+  --forest-deep: #eef9f6;
+  --forest-panel: #c8e8dd;
+  --forest-panel-light: #aadaca;
+  --cream: #06282b;
+  --gold: #fce688;
+  --gold-soft: rgba(110, 86, 0, 0.85);
+  --gold-deep: #d9c56e;
+  --gold-text: #6e5600;
+  --accent-ink: #06282b;
+  --muted: rgba(6, 40, 43, 0.8);
+  --muted-2: rgba(6, 40, 43, 0.58);
+  --border: rgba(6, 40, 43, 0.18);
+  --border-soft: rgba(6, 40, 43, 0.12);
+  --info: #0d9da4;
+  --sage: #0d9da4;
+  --sage-deep: #0a7278;
+  --info-text: #0a6469;
+  --danger: #a5341f;
+  --warning: #8a5a0a;
+  --danger-rgb: 165, 52, 31;
+  --gold-rgb: 252, 230, 136;
+  --cream-rgb: 6, 40, 43;
+  --forest-deep-rgb: 238, 249, 246;
+}
+
+[data-theme='cloud-sky-light'] {
+  --forest: #c8e5f3;
+  --forest-deep: #eef7fc;
+  --forest-panel: #c8e5f3;
+  --forest-panel-light: #a8d6ed;
+  --cream: #071620;
+  --gold: #a9def9;
+  --gold-soft: rgba(21, 85, 120, 0.85);
+  --gold-deep: #6fb8d9;
+  --gold-text: #155578;
+  --accent-ink: #071620;
+  --muted: rgba(7, 22, 32, 0.72);
+  --muted-2: rgba(7, 22, 32, 0.52);
+  --border: rgba(7, 22, 32, 0.18);
+  --border-soft: rgba(7, 22, 32, 0.12);
+  --info: #7fa8bf;
+  --sage: #7fa8bf;
+  --sage-deep: #547c8f;
+  --info-text: #2a5069;
+  --danger: #a5341f;
+  --warning: #8a5a0a;
+  --danger-rgb: 165, 52, 31;
+  --gold-rgb: 169, 222, 249;
+  --cream-rgb: 7, 22, 32;
+  --forest-deep-rgb: 238, 247, 252;
+}
+
+[data-theme='rose-bloom-light'] {
+  --forest: #f0d2d8;
+  --forest-deep: #fcf0f1;
+  --forest-panel: #f0d2d8;
+  --forest-panel-light: #e3b4bd;
+  --cream: #0e1f19;
+  --gold: #ffb7c3;
+  --gold-soft: rgba(143, 37, 64, 0.85);
+  --gold-deep: #d98c9c;
+  --gold-text: #8f2540;
+  --accent-ink: #0e1f19;
+  --muted: rgba(14, 31, 25, 0.78);
+  --muted-2: rgba(14, 31, 25, 0.56);
+  --border: rgba(14, 31, 25, 0.18);
+  --border-soft: rgba(14, 31, 25, 0.12);
+  --info: #a4c3b2;
+  --sage: #a4c3b2;
+  --sage-deep: #6f8a7a;
+  --info-text: #3a5646;
+  --danger: #a5341f;
+  --warning: #8a5a0a;
+  --danger-rgb: 165, 52, 31;
+  --gold-rgb: 255, 183, 195;
+  --cream-rgb: 14, 31, 25;
+  --forest-deep-rgb: 252, 240, 241;
+}
+
+

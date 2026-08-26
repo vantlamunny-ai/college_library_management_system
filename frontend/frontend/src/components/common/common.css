@@ -56,7 +56,7 @@
 
 .clms-btn-primary {
   background: var(--gold);
-  color: var(--forest-deep);
+  color: var(--accent-ink);
 }
 
 .clms-btn-primary:hover:not(:disabled) {
@@ -136,7 +136,7 @@
 .clms-panel-link {
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--gold-text);
   cursor: pointer;
   background: none;
   border: none;
@@ -177,7 +177,7 @@
   font-size: 19px;
   flex-shrink: 0;
   background: rgba(var(--gold-rgb), 0.15);
-  color: var(--gold);
+  color: var(--gold-text);
   position: relative;
   animation: clms-icon-pop 0.5s var(--ease-bounce) both;
 }
@@ -204,7 +204,7 @@
 
 .clms-stat-icon.tone-danger { background: rgba(var(--danger-rgb), 0.15); color: var(--danger); }
 .clms-stat-icon.tone-warning { background: rgba(232, 189, 106, 0.18); color: var(--warning); }
-.clms-stat-icon.tone-info { background: rgba(184, 197, 168, 0.15); color: var(--info); }
+.clms-stat-icon.tone-info { background: rgba(184, 197, 168, 0.15); color: var(--info-text); }
 
 .clms-stat-value {
   font-size: 1.35rem;
@@ -238,11 +238,11 @@
   white-space: nowrap;
 }
 
-.clms-badge-success { background: rgba(var(--gold-rgb), 0.15); color: var(--gold); }
+.clms-badge-success { background: rgba(var(--gold-rgb), 0.15); color: var(--gold-text); }
 .clms-badge-warning { background: rgba(232, 189, 106, 0.2); color: var(--warning); }
 .clms-badge-danger { background: rgba(var(--danger-rgb), 0.18); color: var(--danger); }
 .clms-badge-neutral { background: rgba(var(--cream-rgb), 0.08); color: var(--muted); }
-.clms-badge-info { background: rgba(184, 197, 168, 0.15); color: var(--info); }
+.clms-badge-info { background: rgba(184, 197, 168, 0.15); color: var(--info-text); }
 
 /* Search + filter bar */
 .clms-toolbar {
@@ -309,7 +309,7 @@
 
 .clms-chip-filter.active {
   background: linear-gradient(120deg, var(--gold), var(--gold-deep));
-  color: var(--forest-deep);
+  color: var(--accent-ink);
   border-color: transparent;
 }
 
@@ -462,7 +462,7 @@
 
 .clms-page-btn.active {
   background: linear-gradient(120deg, var(--gold), var(--gold-deep));
-  color: var(--forest-deep);
+  color: var(--accent-ink);
   border-color: transparent;
   font-weight: 700;
 }
@@ -721,7 +721,7 @@
 
 .clms-confirm-icon.is-neutral {
   background: rgba(var(--gold-rgb), 0.15);
-  color: var(--gold);
+  color: var(--gold-text);
 }
 
 /* Spinner */

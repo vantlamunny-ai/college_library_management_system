@@ -54,9 +54,9 @@
   font-size: 17px;
 }
 
-.toast-success .toast-icon { color: var(--gold); }
+.toast-success .toast-icon { color: var(--gold-text); }
 .toast-error .toast-icon { color: var(--danger); }
-.toast-info .toast-icon { color: var(--info); }
+.toast-info .toast-icon { color: var(--info-text); }
 
 .toast-message {
   flex: 1;

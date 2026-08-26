@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { THEMES } from './themes';
+import { THEMES, THEME_GROUPS } from './themes';
 
 const THEME_STORAGE_KEY = 'clms_theme';
 const DEFAULT_THEME = 'forest';
@@ -30,7 +30,7 @@ export function ThemeProvider({ children }) {
     if (THEMES.some((t) => t.id === id)) setThemeState(id);
   }
 
-  return <ThemeContext.Provider value={{ theme, setTheme, themes: THEMES }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme, setTheme, themes: THEMES, groups: THEME_GROUPS }}>{children}</ThemeContext.Provider>;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components -- co-located hook is intentional

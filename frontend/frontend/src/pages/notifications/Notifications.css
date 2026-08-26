@@ -30,7 +30,7 @@
   height: 38px;
   border-radius: 10px;
   background: rgba(var(--gold-rgb), 0.15);
-  color: var(--gold);
+  color: var(--gold-text);
   display: flex;
   align-items: center;
   justify-content: center;
