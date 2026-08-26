@@ -27,7 +27,9 @@ async function generateUsernameFromEmail(email) {
             `SELECT user_id FROM users WHERE LOWER(username) = LOWER(?)`,
             [candidate]
         );
+
         if (rows.length === 0) return candidate;
+
         suffix += 1;
         candidate = `${base}${suffix}`;
     }
@@ -51,12 +53,10 @@ async function register(userData) {
         role: requestedRole
     } = userData;
 
-    // Anyone can pick which role they're registering as — Admin and
-    // Librarian are not hidden behind a hardcoded password or secret.
-    // The only guard is field validation below (a Student still needs a
-    // real roll number in the real format; Librarian/Admin only need a
-    // working email + password).
-    const role = VALID_ROLES.includes(requestedRole) ? requestedRole : "Student";
+    const role =
+        VALID_ROLES.includes(requestedRole)
+            ? requestedRole
+            : "Student";
 
     if (!email || !password) {
         throw new Error(
@@ -68,6 +68,7 @@ async function register(userData) {
     let formattedRollNumber = null;
 
     if (role === "Student") {
+
         if (!username) {
             throw new Error(
                 "Username is required"
@@ -87,7 +88,9 @@ async function register(userData) {
             : null;
 
         if (!formattedRollNumber) {
-            throw new Error("Roll number is required for students");
+            throw new Error(
+                "Roll number is required for students"
+            );
         }
 
         const rollNumberPattern =
@@ -98,9 +101,12 @@ async function register(userData) {
                 "Invalid roll number format. Example: 25KN1A05CB"
             );
         }
+
     } else {
+
         // Librarian / Admin — email + password only.
-        finalUsername = await generateUsernameFromEmail(email);
+        finalUsername =
+            await generateUsernameFromEmail(email);
     }
 
     const [existingUser] = await db.query(
@@ -119,8 +125,7 @@ async function register(userData) {
     }
 
     if (role === "Student") {
-        // Case-insensitive so "John.Doe" and "john.doe" are treated as the
-        // same username — consistent, backend-enforced case handling.
+
         const [existingUsername] = await db.query(
             `
             SELECT user_id
@@ -156,7 +161,9 @@ async function register(userData) {
         await bcrypt.hash(password, 10);
 
     let userId;
+
     try {
+
         const [result] = await db.query(
             `
             INSERT INTO users
@@ -177,22 +184,34 @@ async function register(userData) {
                 status || "Active"
             ]
         );
+
         userId = result.insertId;
+
     } catch (error) {
-        // Defense in depth: the UNIQUE constraint on users.username is what
-        // actually guarantees no two accounts ever collide, even if two
-        // registrations race past the SELECT check above at the same time.
+
         if (error.code === "ER_DUP_ENTRY") {
-            if (String(error.sqlMessage).includes("username")) {
-                throw new Error("Username already exists. Please choose another username.");
+
+            if (
+                String(error.sqlMessage)
+                    .includes("username")
+            ) {
+                throw new Error(
+                    "Username already exists. Please choose another username."
+                );
             }
-            throw new Error("Email already exists! Please login.");
+
+            throw new Error(
+                "Email already exists! Please login."
+            );
         }
+
         throw error;
     }
 
     if (role === "Student") {
+
         try {
+
             await db.query(
                 `
                 INSERT INTO students
@@ -223,21 +242,36 @@ async function register(userData) {
                     admission_year || null
                 ]
             );
+
         } catch (error) {
-            // Roll back the orphaned users row rather than leaving a login
-            // with no student profile behind it.
-            await db.query("DELETE FROM users WHERE user_id = ?", [userId]);
+
+            await db.query(
+                "DELETE FROM users WHERE user_id = ?",
+                [userId]
+            );
+
             if (error.code === "ER_DUP_ENTRY") {
-                throw new Error("Roll number already exists");
+                throw new Error(
+                    "Roll number already exists"
+                );
             }
+
             throw error;
         }
+
     } else if (role === "Librarian") {
+
         try {
+
             await db.query(
                 `
                 INSERT INTO librarians
-                (user_id, employee_id, librarian_name, status)
+                (
+                    user_id,
+                    employee_id,
+                    librarian_name,
+                    status
+                )
                 VALUES (?, ?, ?, 'Active')
                 `,
                 [
@@ -246,12 +280,17 @@ async function register(userData) {
                     finalUsername
                 ]
             );
+
         } catch (error) {
-            await db.query("DELETE FROM users WHERE user_id = ?", [userId]);
+
+            await db.query(
+                "DELETE FROM users WHERE user_id = ?",
+                [userId]
+            );
+
             throw error;
         }
     }
-    // Admin has no secondary profile table — the users row alone is enough.
 
     return {
         user_id: userId,
@@ -263,7 +302,9 @@ async function register(userData) {
     };
 }
 
+
 async function login(userData) {
+
     const {
         email,
         roll_number,
@@ -272,20 +313,27 @@ async function login(userData) {
         role
     } = userData;
 
-    const formattedRollNumber = roll_number
-        ? roll_number.trim().toUpperCase()
-        : null;
+    const formattedRollNumber =
+        roll_number
+            ? roll_number.trim().toUpperCase()
+            : null;
 
     const identifierCount =
-        [email, formattedRollNumber, username].filter(Boolean).length;
+        [
+            email,
+            formattedRollNumber,
+            username
+        ].filter(Boolean).length;
 
     if (identifierCount === 0 || !password) {
+
         throw new Error(
             "An email, roll number, or username, plus password, are required"
         );
     }
 
     if (identifierCount > 1) {
+
         throw new Error(
             "Enter only one of: email, roll number, or username"
         );
@@ -323,6 +371,7 @@ async function login(userData) {
     );
 
     if (rows.length === 0) {
+
         throw new Error(
             "Invalid credentials"
         );
@@ -330,9 +379,6 @@ async function login(userData) {
 
     const user = rows[0];
 
-    // Verify the password before revealing anything about account
-    // state (status, role) — an invalid password should look identical
-    // whether or not the account is blocked/inactive/wrong-role.
     const isMatch =
         await bcrypt.compare(
             password,
@@ -340,30 +386,35 @@ async function login(userData) {
         );
 
     if (!isMatch) {
+
         throw new Error(
             "Invalid credentials"
         );
     }
 
     if (user.status === "Blocked") {
+
         throw new Error(
             "Your account has been blocked. Please contact the library administrator."
         );
     }
 
     if (user.status === "Inactive") {
+
         throw new Error(
             "Your account is inactive. Please contact the library administrator."
         );
     }
 
     if (user.status !== "Active") {
+
         throw new Error(
             "Account is not active"
         );
     }
 
     if (role && role !== user.role) {
+
         throw new Error(
             "The selected role does not match this account. Please choose the correct role and try again."
         );
@@ -384,6 +435,7 @@ async function login(userData) {
 
     return {
         token,
+
         user: {
             user_id: user.user_id,
             username: user.username,
@@ -400,7 +452,9 @@ async function login(userData) {
     };
 }
 
+
 async function getCurrentUser(userId) {
+
     const [rows] = await db.query(
         `
         SELECT
@@ -419,140 +473,137 @@ async function getCurrentUser(userId) {
     return rows[0] || null;
 }
 
+
+// Generate password reset token
 function generateResetToken() {
+
     return crypto
         .randomBytes(32)
         .toString("hex");
 }
 
-// Real Gmail credentials only exist once someone sets EMAIL_USER +
-// EMAIL_APP_PASSWORD in .env — until then, transporter is never created
-// (creating it with empty auth would just fail loudly on every request).
-const emailConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD);
 
-const transporter = emailConfigured
-    ? nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_APP_PASSWORD
-        }
-    })
-    : null;
+// Email configuration
+
+const emailConfigured =
+    Boolean(
+        process.env.EMAIL_USER ||
+        process.env.EMAIL_APP_PASSWORD
+    );
+
+
+const transporter =
+    emailConfigured
+        ? nodemailer.createTransport({
+            service: "gmail",
+
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_APP_PASSWORD
+            }
+        })
+        : null;
+
 
 /**
- * Step 1 of the reset flow. Always generates and stores a fresh token
- * (15-minute expiry) if the email matches an account — but never reveals
- * *whether* it matched, so this can't be used to enumerate registered
- * emails. When real email credentials are configured it sends the link;
- * when they aren't, it returns the link directly in the response instead
- * of silently pretending an email went out.
+ * Step 1 of the reset flow.
+ *
+ * User enters their email in frontend.
+ *
+ * Backend checks that email in users table.
+ *
+ * If email exists:
+ *      generate reset token
+ *      save token
+ *      create reset link
+ *      send email to that user's email
  */
 async function requestPasswordReset(email) {
-    if (!email) {
-        throw new Error(
-            "Email is required"
-        );
-    }
+  if (!email) throw new Error("Email is required");
 
-    const [users] = await db.query(
-        `
-        SELECT user_id, email
-        FROM users
-        WHERE email = ?
-        `,
-        [email]
-    );
+  const [users] = await db.query(
+    `SELECT user_id, email FROM users WHERE email = ?`,
+    [email]
+  );
 
-    if (users.length === 0) {
-        return { emailSent: false, resetLink: null };
-    }
+  if (users.length === 0) {
+    return { emailSent: false, resetLink: null };
+  }
 
-    const user = users[0];
+  const user = users[0];
+  const resetToken = generateResetToken();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    const resetToken =
-        generateResetToken();
+  await db.query(
+    `UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE user_id = ?`,
+    [resetToken, expiresAt, user.user_id]
+  );
 
-    const expiresAt =
-        new Date(
-            Date.now() + 15 * 60 * 1000
-        );
+  const baseUrl = process.env.RESET_PASSWORD_URL || "http://localhost:5173/reset-password";
+  const resetLink = `${baseUrl}/${resetToken}`;
 
-    await db.query(
-        `
-        UPDATE users
-        SET
-            reset_token = ?,
-            reset_token_expires = ?
-        WHERE user_id = ?
-        `,
-        [
-            resetToken,
-            expiresAt,
-            user.user_id
-        ]
-    );
+  if (!emailConfigured) return { emailSent: false, resetLink };
 
-    const baseUrl = process.env.RESET_PASSWORD_URL || "http://localhost:5173/reset-password";
-    const resetLink = `${baseUrl}/${resetToken}`;
-
-    if (!emailConfigured) {
-        return { emailSent: false, resetLink };
-    }
-
-    const message = `
+  const message = `
 Hello,
 
-We received a request to reset your password
-for your College Library System account.
-
+We received a request to reset your password.
 Click the link below to reset your password:
 
 ${resetLink}
 
 This link will expire in 15 minutes.
 
-If you did not request this password reset,
-please ignore this email.
-
 Regards,
 College Library System
 `;
 
-    try {
-        await transporter.sendMail({
-            from: `"College Library System" <${process.env.EMAIL_USER}>`,
-            to: user.email,
-            subject: "Password Reset Request",
-            text: message
-        });
-        return { emailSent: true, resetLink: null };
-    } catch (error) {
-        // Real SMTP failure (bad app password, network, etc.) — the token
-        // is already saved, so fall back to handing back the link rather
-        // than leaving the user with no way to reset at all.
-        console.error("Failed to send password reset email:", error.message);
-        return { emailSent: false, resetLink };
-    }
+  try {
+    await transporter.sendMail({
+      from: `"College Library System" <${process.env.EMAIL_USER}>`,
+      to: user.email,   // 👈 goes to *their* email
+      subject: "Password Reset Request",
+      text: message
+    });
+    return { emailSent: true, resetLink: null };
+  } catch (error) {
+    console.error("Failed to send password reset email:", error.message);
+    return { emailSent: false, resetLink };
+  }
 }
 
-/** Step 2 — consumes the token from the emailed/returned link. */
-async function resetPasswordWithToken(token, newPassword) {
+
+
+/**
+ * Step 2 — consumes the token from
+ * the emailed/returned link.
+ */
+async function resetPasswordWithToken(
+    token,
+    newPassword
+) {
+
     if (!token || !newPassword) {
+
         throw new Error(
             "Token and new password are required"
         );
     }
 
+
     if (newPassword.length < 8) {
+
         throw new Error(
             "Password must be at least 8 characters"
         );
     }
 
+
     const [users] = await db.query(
         `
-        SELECT user_id
+        SELECT
+            user_id,
+            email
         FROM users
         WHERE reset_token = ?
           AND reset_token_expires > NOW()
@@ -560,13 +611,24 @@ async function resetPasswordWithToken(token, newPassword) {
         [token]
     );
 
+
     if (users.length === 0) {
+
         throw new Error(
             "This reset link is invalid or has expired. Please request a new one."
         );
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const user = users[0];
+
+
+    const hashedPassword =
+        await bcrypt.hash(
+            newPassword,
+            10
+        );
+
 
     await db.query(
         `
@@ -577,14 +639,81 @@ async function resetPasswordWithToken(token, newPassword) {
             reset_token_expires = NULL
         WHERE user_id = ?
         `,
-        [hashedPassword, users[0].user_id]
+        [
+            hashedPassword,
+            user.user_id
+        ]
     );
+
+
+    // Send confirmation email
+
+    if (emailConfigured && transporter) {
+
+        const message = `
+Hello,
+
+Your password has been successfully reset for your College Library System account.
+
+If you did not perform this action, please contact the library administrator immediately.
+
+Regards,
+College Library System
+        `;
+
+
+        try {
+
+            await transporter.sendMail({
+
+                from:
+                    `"College Library System" <${process.env.EMAIL_USER}>`,
+
+                // IMPORTANT:
+                // Confirmation also goes to
+                // the user's email.
+
+                to: user.email,
+
+                subject:
+                    "Password Reset Confirmation",
+
+                text:
+                    message
+            });
+
+
+            console.log(
+                "Confirmation email sent successfully"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to send confirmation email:",
+                error.message
+            );
+        }
+    }
+
+
+    return {
+        success: true,
+        message: "Password reset successfully"
+    };
 }
 
+
 module.exports = {
+
     register,
+
     login,
+
     getCurrentUser,
+
     requestPasswordReset,
+
     resetPasswordWithToken
 };
