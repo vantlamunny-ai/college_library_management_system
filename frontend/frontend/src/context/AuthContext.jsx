@@ -94,8 +94,11 @@ export function AuthProvider({ children }) {
       const response =
         await studentService.getMyStudentProfile();
 
-      // apiClient returns response.data directly
-      setStudentProfile(response);
+      // apiClient's response interceptor already unwraps the axios
+      // response down to the backend's JSON body — which is still the
+      // {success, data} envelope, so the actual student fields are one
+      // more level in, at response.data.
+      setStudentProfile(response.data);
 
       setStudentProfileStatus("ready");
     } catch (error) {
