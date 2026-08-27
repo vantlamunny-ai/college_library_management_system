@@ -107,7 +107,7 @@ export default function BookDetails() {
       <div className="bd-grid">
         <Panel title="Book information">
           <div className="bd-cover" style={{ textAlign: 'center', marginBottom: 15 }}>
-            <BookCover src={coverImageSrc} alt={book.title} isbn={book.isbn} />
+            <BookCover key={bookId} src={coverImageSrc} alt={book.title} isbn={book.isbn} />
           </div>
 
           <button 

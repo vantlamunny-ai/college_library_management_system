@@ -67,7 +67,7 @@ function BookCard({ book, selected, onSelect }) {
     >
       {hovering && <span className="lcg-book-spotlight" />}
       <div className="lcg-book-cover">
-        <BookCover src={book.cover_image} alt={book.title} />
+        <BookCover src={book.cover_image} alt={book.title} isbn={book.isbn} />
         <span className="lcg-book-cover-shine" />
         <i className="ti ti-book-2 lcg-book-cover-icon" />
         <div className="lcg-book-hover-glass">
@@ -333,7 +333,7 @@ export default function LibraryCatalog() {
           {selected && (
             <aside className="lcg-detail">
               <div className={`lcg-detail-cover tone-${toneFor(selected.book_id)}`}>
-                <BookCover src={selected.cover_image} alt={selected.title} />
+                <BookCover key={selected.book_id} src={selected.cover_image} alt={selected.title} isbn={selected.isbn} />
                 <i className="ti ti-book-2" />
               </div>
               <h2>{selected.title}</h2>
