@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { baseURL } from '../../api/client';
 
 const LOAD_TIMEOUT_MS = 4000;
 
@@ -17,8 +18,14 @@ const LOAD_TIMEOUT_MS = 4000;
  */
 export function BookCover({ src, alt, isbn }) {
   const cleanIsbn = isbn ? isbn.replace(/[^0-9X]/gi, '') : '';
+  // Routed through our own backend (not books.google.com directly) — it
+  // has no real cover for plenty of ISBNs and returns a valid-looking
+  // "image not available" graphic instead of a 404, which a plain <img>
+  // tag can't tell apart from a real cover. The proxy checks for that and
+  // turns it into an actual 404 so this component's own fallback/error
+  // handling works correctly.
   const googleCover = cleanIsbn
-    ? `https://books.google.com/books/content?vid=ISBN${cleanIsbn}&printsec=frontcover&img=1&zoom=1`
+    ? `${baseURL}/books/cover/${cleanIsbn}`
     : null;
 
   const candidates = [src, googleCover].filter(Boolean);

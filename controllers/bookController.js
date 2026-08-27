@@ -126,11 +126,57 @@ async function deleteBook(req, res, next) {
 
 
 
+// Google Books returns a valid 200 image/png "image not available" graphic
+// instead of a 404 when it has no real cover for an ISBN — same pixel
+// dimensions as a real cover, so a plain <img> tag can't tell the
+// difference and just displays that ugly placeholder as if it worked.
+// Proxying the fetch here lets us actually inspect the response and turn
+// that case into a real 404, which the frontend already knows how to
+// treat as "no cover" and fall through to its own clean placeholder icon.
+async function getBookCover(req, res, next) {
+    try {
+        const isbn = (req.params.isbn || "").replace(/[^0-9Xx]/g, "");
+
+        if (!isbn) {
+            return res.status(404).end();
+        }
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 6000);
+
+        let upstream;
+        try {
+            upstream = await fetch(
+                `https://books.google.com/books/content?vid=ISBN${isbn}&printsec=frontcover&img=1&zoom=1`,
+                { signal: controller.signal }
+            );
+        } finally {
+            clearTimeout(timeout);
+        }
+
+        if (!upstream.ok || upstream.headers.get("content-type") !== "image/jpeg") {
+            return res.status(404).end();
+        }
+
+        const buffer = Buffer.from(await upstream.arrayBuffer());
+
+        res.set("Content-Type", "image/jpeg");
+        res.set("Cache-Control", "public, max-age=86400");
+        res.send(buffer);
+
+    } catch (error) {
+        // A slow/unreachable upstream is the same as "no cover" from the
+        // frontend's point of view, not a real server error.
+        res.status(404).end();
+    }
+}
+
 module.exports = {
     getAllBooks,
     getBookById,
     createBook,
     updateBook,
     deleteBook,
-   
+    getBookCover,
+
 };

@@ -75,9 +75,6 @@ export default function BookDetails() {
     },
   ]
 
-  const cleanIsbn = book.isbn ? book.isbn.replace(/[^0-9X]/gi, '') : ''
-  const coverImageSrc = book.cover_image || (cleanIsbn ? `https://books.google.com/books/content?vid=ISBN${cleanIsbn}&printsec=frontcover&img=1&zoom=1` : null)
-
   return (
     <div>
       <PageHeader
@@ -107,7 +104,7 @@ export default function BookDetails() {
       <div className="bd-grid">
         <Panel title="Book information">
           <div className="bd-cover" style={{ textAlign: 'center', marginBottom: 15 }}>
-            <BookCover key={bookId} src={coverImageSrc} alt={book.title} isbn={book.isbn} />
+            <BookCover key={bookId} src={book.cover_image} alt={book.title} isbn={book.isbn} />
           </div>
 
           <button 

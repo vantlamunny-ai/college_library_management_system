@@ -3,7 +3,7 @@ import axios from "axios";
 export const TOKEN_STORAGE_KEY = "clms_token";
 export const USER_STORAGE_KEY = "clms_user";
 
-const baseURL =
+export const baseURL =
     import.meta.env.VITE_API_BASE_URL ||
     "http://localhost:3000";
 

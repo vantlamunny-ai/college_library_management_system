@@ -17,6 +17,14 @@ router.get(
 );
 
 
+// No verifyToken — a plain <img src> can't attach the Authorization
+// header, so this has to be reachable unauthenticated. It only proxies a
+// public Google Books cover image, nothing sensitive.
+router.get(
+    "/cover/:isbn",
+    bookController.getBookCover
+);
+
 router.get(
     "/:id",
     verifyToken,
