@@ -594,6 +594,281 @@ VALUES
     'A broad reference resource covering science, history, geography, technology, society, culture, and general awareness.',
     'covers/general-knowledge.jpg'
 );
+INSERT IGNORE INTO books
+(
+    isbn,
+    title,
+    category_id,
+    publisher_id,
+    edition,
+    publication_year,
+    language,
+    pages,
+    price,
+    description,
+    cover_image
+)
+VALUES
+(
+    '9780262033848',
+    'Introduction to Algorithms',
+    1,
+    NULL,
+    '3rd Edition',
+    2009,
+    'English',
+    1312,
+    1599.00,
+    'A comprehensive reference on algorithms covering sorting, graph algorithms, dynamic programming, and algorithmic analysis.',
+    'covers/intro-to-algorithms.jpg'
+),
+(
+    '9781118063330',
+    'Operating System Concepts',
+    1,
+    5,
+    '10th Edition',
+    2018,
+    'English',
+    976,
+    1399.00,
+    'A classic textbook covering operating system design, processes, memory management, file systems, and concurrency.',
+    'covers/os-concepts.jpg'
+),
+(
+    '9780132126953',
+    'Computer Networks',
+    2,
+    1,
+    '5th Edition',
+    2010,
+    'English',
+    960,
+    1299.00,
+    'A foundational text covering network architecture, protocols, the internet, and data communication.',
+    'covers/computer-networks-tanenbaum.jpg'
+),
+(
+    '9780262035613',
+    'Deep Learning',
+    4,
+    NULL,
+    '1st Edition',
+    2016,
+    'English',
+    800,
+    1699.00,
+    'An in-depth textbook covering deep learning fundamentals, neural networks, and modern AI research techniques.',
+    'covers/deep-learning-goodfellow.jpg'
+),
+(
+    '9781118008188',
+    'HTML and CSS: Design and Build Websites',
+    5,
+    5,
+    '1st Edition',
+    2011,
+    'English',
+    490,
+    899.00,
+    'A visually engaging guide to building websites using HTML and CSS for beginners and practitioners.',
+    'covers/html-css-duckett.jpg'
+),
+(
+    '9781492032649',
+    'Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow',
+    6,
+    7,
+    '2nd Edition',
+    2019,
+    'English',
+    848,
+    1499.00,
+    'A practical, example-driven guide to building machine learning and deep learning systems in Python.',
+    'covers/hands-on-ml.jpg'
+),
+(
+    '9780134527338',
+    'Network Security Essentials',
+    7,
+    1,
+    '6th Edition',
+    2016,
+    'English',
+    478,
+    999.00,
+    'A concise introduction to network security concepts, cryptography, authentication, and security protocols.',
+    'covers/network-security-essentials.jpg'
+),
+(
+    '9781118026472',
+    'The Web Application Hacker''s Handbook',
+    7,
+    5,
+    '2nd Edition',
+    2011,
+    'English',
+    912,
+    1299.00,
+    'A detailed guide to discovering and exploiting security vulnerabilities in web applications.',
+    'covers/web-app-hackers-handbook.jpg'
+),
+(
+    '9780132622264',
+    'Electronic Devices and Circuit Theory',
+    8,
+    1,
+    '11th Edition',
+    2012,
+    'English',
+    912,
+    1199.00,
+    'A comprehensive introduction to electronic devices, circuit analysis, and semiconductor theory.',
+    'covers/electronic-devices-circuit-theory.jpg'
+),
+(
+    '9780470458365',
+    'Advanced Engineering Mathematics',
+    9,
+    5,
+    '10th Edition',
+    2011,
+    'English',
+    1280,
+    1399.00,
+    'A widely used engineering mathematics reference covering differential equations, linear algebra, and numerical methods.',
+    'covers/advanced-engineering-mathematics.jpg'
+),
+(
+    '9780073380650',
+    'Computer Organization and Embedded Systems',
+    1,
+    2,
+    '6th Edition',
+    2011,
+    'English',
+    790,
+    1099.00,
+    'A detailed study of computer architecture, embedded systems design, and hardware organization.',
+    'covers/computer-organization-embedded.jpg'
+),
+(
+    '9781118771334',
+    'Data Structures and Algorithms in Java',
+    1,
+    5,
+    '6th Edition',
+    2014,
+    'English',
+    736,
+    1299.00,
+    'A thorough introduction to data structures and algorithm design using Java.',
+    'covers/data-structures-java.jpg'
+),
+(
+    '9780133943030',
+    'Software Engineering',
+    1,
+    1,
+    '10th Edition',
+    2015,
+    'English',
+    816,
+    1199.00,
+    'A comprehensive introduction to software engineering principles, processes, and project management.',
+    'covers/software-engineering-sommerville.jpg'
+),
+(
+    '9780321486813',
+    'Compilers: Principles, Techniques, and Tools',
+    1,
+    1,
+    '2nd Edition',
+    2006,
+    'English',
+    1040,
+    1499.00,
+    'The classic "Dragon Book" covering compiler design, parsing, code generation, and optimization.',
+    'covers/compilers-dragon-book.jpg'
+),
+(
+    '9780133591620',
+    'Modern Operating Systems',
+    1,
+    1,
+    '4th Edition',
+    2014,
+    'English',
+    1136,
+    1399.00,
+    'A detailed exploration of operating system design principles, processes, and distributed systems.',
+    'covers/modern-operating-systems.jpg'
+),
+(
+    '9781492078005',
+    'Head First Design Patterns',
+    1,
+    7,
+    '2nd Edition',
+    2020,
+    'English',
+    720,
+    1299.00,
+    'An engaging, visually rich introduction to object-oriented design patterns in software development.',
+    'covers/head-first-design-patterns.jpg'
+),
+(
+    '9781492056355',
+    'Fluent Python',
+    1,
+    7,
+    '2nd Edition',
+    2022,
+    'English',
+    1012,
+    1499.00,
+    'A deep dive into writing idiomatic, effective, and modern Python code.',
+    'covers/fluent-python.jpg'
+),
+(
+    '9780073383095',
+    'Discrete Mathematics and Its Applications',
+    9,
+    2,
+    '7th Edition',
+    2011,
+    'English',
+    1071,
+    1299.00,
+    'A comprehensive introduction to discrete mathematics, logic, combinatorics, and graph theory.',
+    'covers/discrete-mathematics.jpg'
+),
+(
+    '9780134794105',
+    'Computer Security: Principles and Practice',
+    7,
+    1,
+    '4th Edition',
+    2017,
+    'English',
+    944,
+    1399.00,
+    'A comprehensive overview of computer security principles, threats, and defense mechanisms.',
+    'covers/computer-security-principles.jpg'
+),
+(
+    '9780321629111',
+    'Probability and Statistics for Engineers and Scientists',
+    9,
+    1,
+    '9th Edition',
+    2011,
+    'English',
+    816,
+    1199.00,
+    'A foundational text on probability, statistics, and their applications in engineering and science.',
+    'covers/probability-statistics-engineers.jpg'
+);
 
 select * from books;
 ALTER TABLE books ADD COLUMN pdf_url VARCHAR(255) DEFAULT NULL;
@@ -650,6 +925,165 @@ VALUES
     'Computer scientist and author known for work in artificial intelligence, programming, and computational methods.',
     'peter.norvig@example.com'
 );
+INSERT IGNORE INTO books
+(
+    isbn,
+    title,
+    category_id,
+    publisher_id,
+    edition,
+    publication_year,
+    language,
+    pages,
+    price,
+    description,
+    cover_image
+)
+VALUES
+(
+    '9780596007126',
+    'Head First Java',
+    1,
+    7,
+    '2nd Edition',
+    2005,
+    'English',
+    720,
+    1099.00,
+    'A visually engaging, example-driven introduction to Java programming and object-oriented concepts.',
+    'covers/head-first-java.jpg'
+),
+(
+    '9781449355739',
+    'Learning JavaScript Design Patterns',
+    5,
+    7,
+    '1st Edition',
+    2012,
+    'English',
+    254,
+    899.00,
+    'A guide to applying proven design patterns to modern JavaScript development.',
+    'covers/learning-js-design-patterns.jpg'
+),
+(
+    '9780596517748',
+    'JavaScript: The Good Parts',
+    5,
+    7,
+    '1st Edition',
+    2008,
+    'English',
+    176,
+    699.00,
+    'A concise guide highlighting the best features of JavaScript for writing reliable code.',
+    'covers/javascript-good-parts.jpg'
+),
+(
+    '9781491910740',
+    'Designing Data-Intensive Applications',
+    3,
+    7,
+    '1st Edition',
+    2017,
+    'English',
+    616,
+    1499.00,
+    'An in-depth exploration of the architecture and design principles behind reliable, scalable data systems.',
+    'covers/designing-data-intensive-apps.jpg'
+),
+(
+    '9780134685991',
+    'Effective Java',
+    1,
+    1,
+    '3rd Edition',
+    2017,
+    'English',
+    412,
+    1199.00,
+    'Best practices and practical advice for writing robust, efficient, and maintainable Java code.',
+    'covers/effective-java.jpg'
+),
+(
+    '9781449365035',
+    'Learning Python',
+    1,
+    7,
+    '5th Edition',
+    2013,
+    'English',
+    1600,
+    1599.00,
+    'A comprehensive introduction to the Python programming language for beginners and experienced developers.',
+    'covers/learning-python.jpg'
+),
+(
+    '9780262533058',
+    'Introduction to Machine Learning',
+    4,
+    NULL,
+    '4th Edition',
+    2020,
+    'English',
+    712,
+    1399.00,
+    'A foundational textbook covering supervised learning, neural networks, and statistical learning theory.',
+    'covers/intro-machine-learning.jpg'
+),
+(
+    '9780134093413',
+    'Starting Out with Python',
+    1,
+    1,
+    '4th Edition',
+    2017,
+    'English',
+    792,
+    999.00,
+    'A beginner-friendly introduction to programming concepts and problem solving using Python.',
+    'covers/starting-out-python.jpg'
+),
+(
+    '9781593279288',
+    'Automate the Boring Stuff with Python',
+    1,
+    NULL,
+    '2nd Edition',
+    2019,
+    'English',
+    592,
+    899.00,
+    'A practical guide to using Python to automate everyday tasks and improve productivity.',
+    'covers/automate-boring-stuff.jpg'
+),
+(
+    '9780470128728',
+    'Computer Architecture: A Quantitative Approach',
+    8,
+    5,
+    '5th Edition',
+    2011,
+    'English',
+    856,
+    1499.00,
+    'A comprehensive study of computer architecture principles, performance analysis, and hardware design trade-offs.',
+    'covers/computer-architecture-quantitative.jpg'
+)
+;
+INSERT INTO authors
+(author_name, biography, email)
+VALUES
+('Ian Sommerville', 'Author of the widely used Software Engineering textbook.', 'ian.sommerville@example.com'),
+('Alfred V. Aho', 'Computer scientist and co-author of the classic compilers textbook known as the Dragon Book.', 'alfred.aho@example.com'),
+('Erwin Kreyszig', 'Mathematician known for the widely used Advanced Engineering Mathematics textbook.', 'erwin.kreyszig@example.com'),
+('Kenneth H. Rosen', 'Author of the widely used Discrete Mathematics and Its Applications textbook.', 'kenneth.rosen@example.com'),
+('Robert L. Boylestad', 'Author known for textbooks on electronic devices and circuit theory.', 'robert.boylestad@example.com'),
+('Michael T. Goodrich', 'Computer scientist and co-author of data structures and algorithms textbooks.', 'michael.goodrich@example.com'),
+('Dafydd Stuttard', 'Security researcher and author of The Web Application Hacker''s Handbook.', 'dafydd.stuttard@example.com'),
+('Eric Freeman', 'Co-author of the Head First series, including Head First Design Patterns.', 'eric.freeman@example.com'),
+('Ronald E. Walpole', 'Author known for textbooks on probability and statistics for engineers.', 'ronald.walpole@example.com'),
+('Carl Hamacher', 'Author known for textbooks on computer organization and embedded systems.', 'carl.hamacher@example.com');
 select * from authors;
 INSERT IGNORE INTO book_authors
 (book_id, author_id)
@@ -1263,3 +1697,43 @@ VALUES
 (6, 17, 9, '2026-08-06', '2026-08-20', 'Issued', 0),
 (7, 18, 9, '2026-08-07', '2026-08-21', 'Issued', 0),
 (8, 11, 9, '2026-08-08', '2026-08-22', 'Issued', 0);
+INSERT INTO book_issues
+(copy_id, student_id, librarian_id, issue_date, due_date, status)
+VALUES
+(1, 38, 57, '2026-08-20', '2026-08-27', 'Issued'),
+(2, 38, 57, '2026-08-22', '2026-08-29', 'Issued'),
+(3, 38, 57, '2026-08-10', '2026-08-25', 'Overdue');
+UPDATE book_copies
+SET availability_status = 'Issued'
+WHERE copy_id IN (1, 2, 3);
+INSERT INTO fines
+(issue_id, student_id, fine_type, amount, reason, payment_status)
+VALUES
+(51, 38, 'Late Return', 20.00, 'Book is overdue by 2 days', 'Pending');
+INSERT INTO notifications
+(user_id, title, message, notification_type, is_read)
+VALUES
+(113, 'Book Due Today', 'Your borrowed book is due today. Please return it to the library.', 'Due Reminder', 0),
+
+(113, 'Book Due Soon', 'Your borrowed book is due on August 29, 2026.', 'Due Reminder', 0),
+
+(113, 'Book Overdue', 'You have a book that is overdue. Please return it as soon as possible.', 'Overdue', 0),
+
+(113, 'Pending Fine', 'You have a pending library fine of ₹20.00.', 'Fine', 0);
+INSERT INTO notifications
+(user_id, title, message, notification_type, is_read)
+VALUES
+(71, 'Book Due Today', 'A borrowed book is due for return today.', 'Due Reminder', 0),
+
+(71, 'Book Due Soon', 'A borrowed book is due within the next 3 days.', 'Due Reminder', 0),
+
+(71, 'Overdue Book Alert', 'A borrowed book has passed its due date.', 'Overdue', 0),
+
+(71, 'Pending Fine', 'A pending library fine requires attention.', 'Fine', 0);
+INSERT INTO notifications
+(user_id, title, message, notification_type, is_read)
+VALUES
+(123, 'Book Due Today', 'A borrowed book is due for return today.', 'Due Reminder', 0),
+(123, 'Book Due Soon', 'A borrowed book is due within the next 3 days.', 'Due Reminder', 0),
+(123, 'Overdue Book Alert', 'A borrowed book has passed its due date.', 'Overdue', 0),
+(123, 'Pending Fine', 'A pending library fine requires attention.', 'Fine', 0);

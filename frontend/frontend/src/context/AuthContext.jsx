@@ -94,11 +94,21 @@ export function AuthProvider({ children }) {
       const response =
         await studentService.getMyStudentProfile();
 
+<<<<<<< HEAD
       // apiClient's response interceptor already unwraps the axios
       // response down to the backend's JSON body — which is still the
       // {success, data} envelope, so the actual student fields are one
       // more level in, at response.data.
       setStudentProfile(response.data);
+=======
+      // FIX: the backend responds with { success, data: student }.
+      // Unwrap `data` so studentProfile holds the actual student
+      // object (student_id, department, year, semester, ...)
+      // instead of the whole { success, data } wrapper.
+      const profileData = response?.data ?? response;
+
+      setStudentProfile(profileData);
+>>>>>>> 8aae40a (Update frontend and Backend)
 
       setStudentProfileStatus("ready");
     } catch (error) {
