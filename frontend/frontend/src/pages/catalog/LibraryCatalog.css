@@ -109,7 +109,8 @@
 .lcg-book-card {
   background: var(--forest-panel); border: 1px solid var(--border); border-radius: 16px; padding: 12px;
   cursor: pointer; text-align: left; font: inherit; position: relative;
-  transition: box-shadow 0.25s ease, border-color 0.2s ease, transform 0.25s var(--ease-bounce);
+  transition: box-shadow 0.25s ease, border-color 0.2s ease, transform 0.25s var(--ease-bounce),
+    filter 0.25s ease, opacity 0.25s ease;
   transform-style: preserve-3d;
 }
 .lcg-book-card:hover {
@@ -120,6 +121,14 @@
      from cursor position), this rule only owns shadow/border on hover */
 }
 .lcg-book-card.selected { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(var(--gold-rgb), 0.3); }
+
+/* Spotlight the hovered card by blurring every other card in the grid —
+   :has() lets the grid itself react to which child is hovered, no JS
+   state needed. */
+.lcg-grid:has(.lcg-book-card:hover) .lcg-book-card:not(:hover) {
+  filter: blur(4px);
+  opacity: 0.55;
+}
 
 /* Cursor-following glow, position comes from --spot-x/--spot-y set inline
    from the mousemove handler, so the highlight tracks the pointer. */

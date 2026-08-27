@@ -303,12 +303,14 @@ export default function LibraryCatalog() {
                       <BookCard key={book.book_id} book={book} selected={selected?.book_id === book.book_id} onSelect={selectBook} />
                     ))}
                   </div>
-                  <div className="lcg-scroll-fade" style={{ opacity: 1 - scrollProgress, pointerEvents: scrollProgress > 0.85 ? 'none' : 'auto' }}>
-                    <div className="lcg-scroll-hint">
-                      <i className="ti ti-chevron-down" />
-                      <span>Scroll to explore more books</span>
+                  {filtered.length > 6 && (
+                    <div className="lcg-scroll-fade" style={{ opacity: 1 - scrollProgress, pointerEvents: scrollProgress > 0.85 ? 'none' : 'auto' }}>
+                      <div className="lcg-scroll-hint">
+                        <i className="ti ti-chevron-down" />
+                        <span>Scroll to explore more books</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </>
               )}
             </div>
