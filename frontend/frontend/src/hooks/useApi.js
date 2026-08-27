@@ -51,7 +51,12 @@ export function useApi(
       return
     }
 
-    execute()
+    // execute() already records the failure via setError — nothing here
+    // awaits this call, so without this .catch() a failed request becomes
+    // an unhandled promise rejection (which Vite's dev overlay treats as a
+    // fatal error and covers the whole page with, hiding everything
+    // underneath it, themes and book covers included).
+    execute().catch(() => {})
   }, [execute, enabled, ...dependencies])
 
   return {
