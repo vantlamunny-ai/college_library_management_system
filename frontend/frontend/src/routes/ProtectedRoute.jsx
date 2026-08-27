@@ -1,24 +1,54 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Navigate, useLocation } from "react-router-dom";
+
+import { useAuth } from "../hooks/useAuth";
 
 /**
- * Gates a route behind authentication and, optionally, a set of allowed
- * roles. This is a UX guard only — the backend's verifyToken/authorizeRoles
- * middleware remains the real security boundary.
+ * Gates a route behind authentication and,
+ * optionally, a set of allowed roles.
+ *
+ * Backend authentication/authorization remains
+ * the real security boundary.
  */
 export function ProtectedRoute({ roles, children }) {
-  const { isAuthenticated, role, initializing } = useAuth();
-  const location = useLocation();
+    const {
+        isAuthenticated,
+        role,
+        initializing,
+    } = useAuth();
 
-  if (initializing) return null;
+    const location = useLocation();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+    // Wait while authentication is initializing
+    if (initializing) {
+        return null;
+    }
 
-  if (roles && !roles.includes(role)) {
-    return <Navigate to="/403" replace />;
-  }
+    // User is not logged in
+    if (!isAuthenticated) {
+        return (
+            <Navigate
+                to="/login"
+                state={{ from: location }}
+                replace
+            />
+        );
+    }
 
-  return children;
+    // User doesn't have required role
+    if (
+        roles &&
+        !roles.includes(role)
+    ) {
+        return (
+            <Navigate
+                to="/403"
+                replace
+            />
+        );
+    }
+
+    // User is authenticated and authorized
+    return children;
 }
+
+export default ProtectedRoute;

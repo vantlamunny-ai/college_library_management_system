@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 
 const bookController = require("../controllers/bookController");
+const bookPdfController = require("../controllers/bookpdfController");
+const uploadPdf = require("../config/multerConfig");
 
 const verifyToken = require("../middleware/authMiddleware");
 
@@ -41,6 +43,17 @@ router.delete(
     authorizeRoles("Admin"),
     bookController.deleteBook
 );
-
+router.put(
+    "/:id/pdf",
+    verifyToken,
+    authorizeRoles("Admin", "Librarian"),
+    uploadPdf.single("pdf"),
+    bookPdfController.uploadBookPdf
+);
+router.get(
+    "/:id/pdf",
+    verifyToken,
+    bookPdfController.getBookPdf
+);
 
 module.exports = router;

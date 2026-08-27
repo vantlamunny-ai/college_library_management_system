@@ -8,7 +8,8 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog'
 import { ErrorState } from '../../components/common/ErrorState'
 import { SkeletonBlock } from '../../components/common/LoadingSkeleton'
 import { BookFormModal } from '../../components/books/BookFormModal'
-import { BookCover } from '../../components/books/BookCover'
+import BookCover from '../../components/books/BookCover'
+import BookReaderModal from '../../components/books/BookReaderModal'
 import { useApi, useMutation } from '../../hooks/useApi'
 import { useToast } from '../../context/ToastContext'
 import { useAuth } from '../../context/AuthContext'
@@ -27,6 +28,7 @@ export default function BookDetails() {
 
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [isReaderOpen, setIsReaderOpen] = useState(false)
 
   const { data: book, loading, error, refetch } = useApi(() => bookService.getBookById(bookId), [bookId])
   const { data: activeIssues } = useApi(() => issueService.getActiveIssues(), [], { enabled: isStaff })
@@ -73,29 +75,49 @@ export default function BookDetails() {
     },
   ]
 
+  const cleanIsbn = book.isbn ? book.isbn.replace(/[^0-9X]/gi, '') : ''
+  const coverImageSrc = book.cover_image || (cleanIsbn ? `https://books.google.com/books/content?vid=ISBN${cleanIsbn}&printsec=frontcover&img=1&zoom=1` : null)
+
   return (
     <div>
       <PageHeader
         title={book.title}
         subtitle={`${book.category_name || 'Uncategorized'} · ${book.publisher_name || 'Unknown publisher'}`}
         actions={
-          isStaff && (
-            <>
-              <button className="clms-btn clms-btn-ghost" onClick={() => setEditOpen(true)}><i className="ti ti-edit" /> Edit book</button>
-              {role === 'Admin' && (
-                <button className="clms-btn clms-btn-danger" onClick={() => setDeleteOpen(true)}><i className="ti ti-trash" /> Delete</button>
-              )}
-            </>
-          )
+          <>
+            <button 
+              className="clms-btn clms-btn-primary" 
+              onClick={() => setIsReaderOpen(true)}
+              style={{ background: '#22c55e', color: '#fff', border: 'none' }}
+            >
+              <i className="ti ti-book" /> Read Online
+            </button>
+            {isStaff && (
+              <>
+                <button className="clms-btn clms-btn-ghost" onClick={() => setEditOpen(true)}><i className="ti ti-edit" /> Edit book</button>
+                {role === 'Admin' && (
+                  <button className="clms-btn clms-btn-danger" onClick={() => setDeleteOpen(true)}><i className="ti ti-trash" /> Delete</button>
+                )}
+              </>
+            )}
+          </>
         }
       />
 
       <div className="bd-grid">
         <Panel title="Book information">
-          <div className="bd-cover">
-            <BookCover src={book.cover_image} alt={book.title} />
-            <i className="ti ti-book-2" />
+          <div className="bd-cover" style={{ textAlign: 'center', marginBottom: 15 }}>
+            <BookCover src={coverImageSrc} alt={book.title} isbn={book.isbn} />
           </div>
+
+          <button 
+            className="clms-btn"
+            onClick={() => setIsReaderOpen(true)}
+            style={{ width: '100%', marginBottom: 18, background: '#22c55e', color: '#fff', border: 'none', padding: '10px', fontWeight: 'bold' }}
+          >
+            📖 Read Online (PDF Viewer)
+          </button>
+
           <div className="clms-row-card-fields">
             <div className="clms-row-card-field"><span>Author(s)</span><span>{book.authors?.length ? book.authors.map((a) => a.author_name).join(', ') : '—'}</span></div>
             <div className="clms-row-card-field"><span>ISBN</span><span className="clms-cell-mono">{book.isbn}</span></div>
@@ -117,7 +139,7 @@ export default function BookDetails() {
           title={`Copies (${book.copies?.length || 0})`}
           headerRight={
             isStaff && (
-              <button className="clms-panel-link" disabled title="No backend endpoint exists yet to add a copy directly (POST /books/:id/copies is not implemented).">
+              <button className="clms-panel-link" disabled title="No backend endpoint exists yet to add a copy directly.">
                 <i className="ti ti-plus" /> Add copy
               </button>
             )
@@ -131,13 +153,21 @@ export default function BookDetails() {
             emptyMessage="This book has no physical copies catalogued yet."
             emptyIcon="ti-books"
             rowActions={isStaff ? () => (
-              <span className="clms-badge clms-badge-neutral" title="Editing an individual copy's condition/status has no backend endpoint yet — use the Circulation or Lost/Damaged pages, which reuse the real issue/return endpoints instead.">
+              <span className="clms-badge clms-badge-neutral">
                 No direct edit yet
               </span>
             ) : undefined}
           />
         </Panel>
       </div>
+
+      {/* Book Reader Modal Component */}
+      <BookReaderModal
+        isOpen={isReaderOpen}
+        onClose={() => setIsReaderOpen(false)}
+        pdfUrl={book?.digitalBook?.file_path || book?.file_path}
+        bookTitle={book?.title}
+      />
 
       {isStaff && <BookFormModal open={editOpen} book={book} onClose={() => setEditOpen(false)} onSaved={refetch} />}
 

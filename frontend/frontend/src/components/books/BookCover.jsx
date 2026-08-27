@@ -1,36 +1,33 @@
-import { useState } from 'react'
+import React, { useState } from 'react';
 
-/**
- * Renders a real cover image on top of the existing gradient+icon
- * placeholder (never replacing it) — so a missing or broken cover just
- * quietly leaves the placeholder visible instead of showing a blank box,
- * a spinner, or breaking layout. Handles: loading (image is invisible
- * until decoded), missing src (no image attempted at all), and broken
- * images (onError permanently suppresses the <img>).
- */
-export function BookCover({ src, alt, className }) {
-  const [loaded, setLoaded] = useState(false)
-  const [broken, setBroken] = useState(false)
+// Added named export here (export function BookCover)
+export function BookCover({ src, alt, isbn }) {
+  const [imgError, setImgError] = useState(false);
 
-  if (!src || broken) return null
+  const cleanIsbn = isbn ? isbn.replace(/[^0-9X]/gi, '') : '';
+  const googleCover = cleanIsbn 
+    ? `https://books.google.com/books/content?vid=ISBN${cleanIsbn}&printsec=frontcover&img=1&zoom=1` 
+    : null;
+
+  const imageSrc = src || googleCover;
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      loading="lazy"
-      className={className}
-      onLoad={() => setLoaded(true)}
-      onError={() => setBroken(true)}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-        opacity: loaded ? 1 : 0,
-        transition: 'opacity 0.25s ease',
-      }}
-    />
-  )
+    <div className="clms-book-cover-wrap" style={{ width: '100%', height: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {imageSrc && !imgError ? (
+        <img
+          src={imageSrc}
+          alt={alt || 'Book Cover'}
+          onError={() => setImgError(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      ) : (
+        <div className="clms-book-cover-placeholder" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#334155', color: '#94a3b8', width: '100%', height: '100%' }}>
+          <i className="ti ti-book-2" style={{ fontSize: '2rem' }} />
+        </div>
+      )}
+    </div>
+  );
 }
+
+// Keeping default export as fallback
+export default BookCover;

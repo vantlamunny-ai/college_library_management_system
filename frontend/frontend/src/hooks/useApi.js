@@ -1,75 +1,110 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-/**
- * Generic data-fetching hook wrapping a service call with loading/error/data
- * state. `fetcher` must be stable across renders that shouldn't refetch —
- * pass a useCallback, or rely on the deps array like useEffect.
- *
- * @param {() => Promise<{data:any, count?:number}>} fetcher
- * @param {any[]} deps
- * @param {{enabled?: boolean}} [options]
- */
-export function useApi(fetcher, deps = [], options = {}) {
-  const { enabled = true } = options;
-  const [data, setData] = useState(null);
-  const [count, setCount] = useState(undefined);
-  const [loading, setLoading] = useState(enabled);
-  const [error, setError] = useState(null);
-  const requestId = useRef(0);
+export function useApi(
+  apiFunction,
+  dependencies = [],
+  options = {}
+) {
+  const { enabled = true } = options
 
-  const load = useCallback(() => {
-    if (!enabled) return;
-    const id = ++requestId.current;
-    setLoading(true);
-    setError(null);
-    fetcher()
-      .then((res) => {
-        if (id !== requestId.current) return;
-        setData(res?.data ?? null);
-        setCount(res?.count);
-      })
-      .catch((err) => {
-        if (id !== requestId.current) return;
-        setError(err);
-      })
-      .finally(() => {
-        if (id !== requestId.current) return;
-        setLoading(false);
-      });
-    // eslint-disable-next-line react-hooks/use-memo, react-hooks/exhaustive-deps -- deps is intentionally a caller-supplied array, not a literal
-  }, deps);
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const apiFunctionRef = useRef(apiFunction)
 
   useEffect(() => {
-    load();
-  }, [load]);
+    apiFunctionRef.current = apiFunction
+  }, [apiFunction])
 
-  return { data, count, loading, error, refetch: load };
+  const execute = useCallback(async () => {
+    if (!enabled) {
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await apiFunctionRef.current()
+      // Backend wraps everything as {success, data, ...} — unwrap it here,
+      // once, so every component that uses this hook gets the plain
+      // array/object directly instead of having to reach into `.data`.
+      const unwrapped = response && typeof response === 'object' && 'data' in response
+        ? response.data
+        : response
+      setData(unwrapped)
+      return unwrapped
+    } catch (err) {
+      setError(err)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [enabled])
+
+  useEffect(() => {
+    if (!enabled) {
+      setData(null)
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    execute()
+  }, [execute, enabled, ...dependencies])
+
+  return {
+    data,
+    loading,
+    error,
+    refetch: execute,
+  }
 }
 
-/**
- * Wraps an async mutation (create/update/delete) with loading/error state
- * for forms and action buttons. Returns [run, {loading, error}].
- */
-export function useMutation(mutationFn) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const run = useCallback(
-    async (...args) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await mutationFn(...args);
-        return res;
-      } catch (err) {
-        setError(err);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
+// ========================================
+// useMutation
+// ========================================
+
+export function useMutation(mutationFunction) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const mutationFunctionRef = useRef(mutationFunction)
+
+  useEffect(() => {
+    mutationFunctionRef.current = mutationFunction
+  }, [mutationFunction])
+
+  const mutate = useCallback(async (...args) => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await mutationFunctionRef.current(...args)
+      const unwrapped = response && typeof response === 'object' && 'data' in response
+        ? response.data
+        : response
+      setData(unwrapped)
+      return unwrapped
+    } catch (err) {
+      setError(err)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  return [
+    mutate,
+    {
+      data,
+      loading,
+      error,
     },
-    [mutationFn]
-  );
-
-  return [run, { loading, error }];
+  ]
 }
+
+export default useApi

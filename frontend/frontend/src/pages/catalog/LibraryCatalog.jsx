@@ -7,10 +7,12 @@ import { useToast } from '../../context/ToastContext'
 import * as bookService from '../../services/bookService'
 import * as issueService from '../../services/issueService'
 import * as reservationService from '../../services/reservationService'
+import * as digitalBookService from '../../services/digitalBookService'
 import { BookFormModal } from '../../components/books/BookFormModal'
-import { BookCover } from '../../components/books/BookCover'
+import BookCover from '../../components/books/BookCover'
 import { ThemeSwitcher } from '../../components/common/ThemeSwitcher'
 import './LibraryCatalog.css'
+
 
 function availabilityState(book) {
   const available = book.available_copies ?? 0
@@ -105,12 +107,15 @@ export default function LibraryCatalog() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
   const gridRef = useRef(null)
+  const pdfInputRef = useRef(null)
+  const [pdfUploading, setPdfUploading] = useState(false)
 
   const isStaff = role === 'Admin' || role === 'Librarian'
 
   const { data: books, loading, error, refetch } = useApi(() => bookService.getAllBooks(), [])
   const { data: overdueIssues } = useApi(() => issueService.getOverdueIssues(), [], { enabled: isStaff })
   const { data: reservations } = useApi(() => reservationService.getAllReservations(), [], { enabled: isStaff })
+  const { data: digitalBooks, refetch: refetchDigitalBooks } = useApi(() => digitalBookService.getDigitalBooks(), [])
 
   const list = useMemo(() => books || [], [books])
   const categories = useMemo(() => {
@@ -131,6 +136,11 @@ export default function LibraryCatalog() {
     [selected?.book_id],
     { enabled: Boolean(selected) }
   )
+
+  const selectedDigitalBook = useMemo(() => {
+    if (!selected || !digitalBooks) return null
+    return (digitalBooks || []).find((d) => d.book_id === selected.book_id) || null
+  }, [digitalBooks, selected])
 
   const lowStock = list.filter((b) => (b.available_copies ?? 0) === 1).length
   const outOfStock = list.filter((b) => (b.available_copies ?? 0) === 0).length
@@ -174,6 +184,34 @@ export default function LibraryCatalog() {
     } catch (err) {
       toast.error(err?.message || 'Could not create reservation.')
     }
+  }
+
+  async function handlePdfSelected(e) {
+    const file = e.target.files?.[0]
+    if (!file || !selected) return
+    setPdfUploading(true)
+    try {
+      await digitalBookService.uploadDigitalBook(selected.book_id, file)
+      toast.success('PDF uploaded successfully.')
+      refetchDigitalBooks()
+    } catch (err) {
+      toast.error(err?.message || 'Could not upload PDF.')
+    } finally {
+      setPdfUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  function handleReadOnline() {
+    if (!selectedDigitalBook?.file_path) {
+      toast.error('No PDF available for this book yet.')
+      return
+    }
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+    const filePath = selectedDigitalBook.file_path.startsWith('/')
+      ? selectedDigitalBook.file_path
+      : `/${selectedDigitalBook.file_path}`
+    window.open(`${baseUrl}${filePath}`, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -332,6 +370,35 @@ export default function LibraryCatalog() {
                 >
                   {reserveState.loading ? <span className="clms-spinner" /> : <i className="ti ti-bookmark" />} Reserve this book
                 </button>
+              )}
+
+              <button
+                className="clms-btn clms-btn-ghost"
+                style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
+                disabled={!selectedDigitalBook}
+                onClick={handleReadOnline}
+              >
+                <i className="ti ti-book" /> {selectedDigitalBook ? 'Read online' : 'No PDF available'}
+              </button>
+
+              {isStaff && (
+                <>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    ref={pdfInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handlePdfSelected}
+                  />
+                  <button
+                    className="clms-btn clms-btn-ghost"
+                    style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
+                    disabled={pdfUploading}
+                    onClick={() => pdfInputRef.current?.click()}
+                  >
+                    {pdfUploading ? <span className="clms-spinner" /> : <i className="ti ti-upload" />} {selectedDigitalBook ? 'Replace PDF' : 'Upload PDF'}
+                  </button>
+                </>
               )}
             </aside>
           )}

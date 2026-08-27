@@ -45,11 +45,11 @@ export default function AdminDashboard() {
   const { data: reservations } = useApi(() => reservationService.getAllReservations(), [])
 
   const d = dashboard || {}
-  const monthlyIssues = useMemo(() => groupByMonth(issueReport || [], 'issue_date', 6), [issueReport])
+  const monthlyIssues = useMemo(() => groupByMonth(issueReport?.data || [], 'issue_date', 6), [issueReport])
   const maxMonthly = Math.max(1, ...monthlyIssues.map((m) => m.v))
 
-  const copyStatus = useMemo(() => {
-    const rows = copyReport || []
+    const copyStatus = useMemo(() => {
+    const rows = copyReport?.data || []
     const counts = { Available: 0, Issued: 0, Reserved: 0, Damaged: 0, Lost: 0 }
     for (const c of rows) {
       if (counts[c.availability_status] !== undefined) counts[c.availability_status] += 1
@@ -73,17 +73,17 @@ export default function AdminDashboard() {
 
   const activity = useMemo(() => {
     const items = []
-    for (const i of (issueReport || []).slice(0, 5)) {
+    for (const i of (issueReport?.data || []).slice(0, 5)) {
       items.push({ icon: 'ti-book-2', text: `Book issued — "${i.title}" to ${i.student_name}`, at: i.issue_date })
     }
-    for (const r of (returnReport || []).slice(0, 5)) {
+    for (const r of (returnReport?.data || []).slice(0, 5)) {
       items.push({ icon: 'ti-corner-down-left', text: `Book returned — "${r.title}", condition: ${r.condition_status}`, at: r.return_date || r.created_at })
     }
-    for (const f of (fines || []).slice(0, 5)) {
+    for (const f of (fines?.data || []).slice(0, 5)) {
       items.push({ icon: 'ti-receipt', text: `Fine of ${formatCurrency(f.amount)} — ${f.payment_status}`, at: f.created_at })
     }
-    for (const res of (reservations || []).slice(0, 5)) {
-      items.push({ icon: 'ti-bookmark', text: `Reservation ${res.status.toLowerCase()} — book #${res.book_id}`, at: res.reservation_date })
+        for (const res of (reservations?.data || []).slice(0, 5)) {
+      items.push({ icon: 'ti-bookmark', text: `Reservation ${res.status?.toLowerCase() || 'pending'} — book #${res.book_id}`, at: res.reservation_date })
     }
     return items
       .filter((it) => it.at)
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
               <div className="ag-skeleton" style={{ height: 160 }} />
             ) : issuesError ? (
               <ErrorState message="Could not load recent circulation." onRetry={refetchIssues} />
-            ) : !recentIssues || recentIssues.length === 0 ? (
+                        ) : !recentIssues?.data || recentIssues.data.length === 0 ? (
               <div className="ag-empty-panel"><i className="ti ti-transfer" /><p>No circulation activity yet.</p></div>
             ) : (
               <table className="ag-table">
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
                   <tr><th>Student</th><th>Book</th><th>Issue date</th><th>Due date</th><th>Status</th></tr>
                 </thead>
                 <tbody>
-                  {recentIssues.slice(0, 6).map((r) => (
+                                    {recentIssues.data.slice(0, 6).map((r) => (
                     <tr key={r.issue_id}>
                       <td>
                         <div className="ag-book-title">{r.student_name}</div>

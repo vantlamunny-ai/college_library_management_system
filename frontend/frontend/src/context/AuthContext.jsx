@@ -1,122 +1,299 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import * as authService from '../services/authService';
-import * as studentService from '../services/studentService';
-import { TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from '../api/client';
-import { looksLikeRollNumber } from '../utils/validation';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-const AuthContext = createContext(null);
+import * as authService from "../services/authService";
+import * as studentService from "../services/studentService";
+
+import {
+  TOKEN_STORAGE_KEY,
+  USER_STORAGE_KEY,
+} from "../api/client";
+
+import { looksLikeRollNumber } from "../utils/validation";
+
+export const AuthContext = createContext(null);
 
 function readStoredUser() {
   try {
     const raw = localStorage.getItem(USER_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
+
+    if (!raw) {
+      return null;
+    }
+
+    return JSON.parse(raw);
+  } catch (error) {
+    console.error("Failed to read stored user:", error);
     return null;
   }
 }
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(readStoredUser);
-  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_STORAGE_KEY));
+
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem(TOKEN_STORAGE_KEY);
+  });
+
   const [studentProfile, setStudentProfile] = useState(null);
-  const [studentProfileStatus, setStudentProfileStatus] = useState('idle'); // idle|loading|ready|unavailable
+
+  const [studentProfileStatus, setStudentProfileStatus] =
+    useState("idle");
+
+  // =========================================================
+  // LOGOUT
+  // =========================================================
 
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_STORAGE_KEY);
+
     setToken(null);
     setUser(null);
+
     setStudentProfile(null);
-    setStudentProfileStatus('idle');
+    setStudentProfileStatus("idle");
   }, []);
 
+  // =========================================================
+  // HANDLE UNAUTHORIZED
+  // =========================================================
+
   useEffect(() => {
-    window.addEventListener('clms:unauthorized', logout);
-    return () => window.removeEventListener('clms:unauthorized', logout);
+    const handleUnauthorized = () => {
+      logout();
+    };
+
+    window.addEventListener(
+      "clms:unauthorized",
+      handleUnauthorized
+    );
+
+    return () => {
+      window.removeEventListener(
+        "clms:unauthorized",
+        handleUnauthorized
+      );
+    };
   }, [logout]);
 
+  // =========================================================
+  // LOAD STUDENT PROFILE
+  // =========================================================
+
   const loadStudentProfile = useCallback(async () => {
-    setStudentProfileStatus('loading');
+    setStudentProfileStatus("loading");
+
     try {
-      const res = await studentService.getMyStudentProfile();
-      setStudentProfile(res.data);
-      setStudentProfileStatus('ready');
-    } catch {
-      // No students row linked to this account yet (e.g. an Admin/Librarian
-      // created the login but hasn't added the student record). Not fatal.
+      const response =
+        await studentService.getMyStudentProfile();
+
+      // apiClient returns response.data directly
+      setStudentProfile(response);
+
+      setStudentProfileStatus("ready");
+    } catch (error) {
+      console.error(
+        "Student profile error:",
+        error
+      );
+
       setStudentProfile(null);
-      setStudentProfileStatus('unavailable');
+      setStudentProfileStatus("unavailable");
     }
   }, []);
 
-  /* eslint-disable react-hooks/set-state-in-effect --
-     This effect only re-runs when `user` changes identity (login/logout),
-     never on every render — it derives/fetches studentProfile from that
-     one dependency, which is exactly what effects are for. */
+  // =========================================================
+  // LOAD STUDENT PROFILE WHEN USER CHANGES
+  // =========================================================
+
   useEffect(() => {
-    if (user?.role !== 'Student') {
+    if (!user || user.role !== "Student") {
       setStudentProfile(null);
-      setStudentProfileStatus('idle');
+      setStudentProfileStatus("idle");
       return;
     }
 
-    // Always goes to GET /students/me rather than reconstructing a partial
-    // profile from the login response — the profile now carries bio,
-    // interests, and a profile picture too, none of which the login
-    // response should be bloated with (a photo can be a few hundred KB).
     loadStudentProfile();
   }, [user, loadStudentProfile]);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
-  /**
-   * @param {string} identifier email, roll number, or username — the login
-   *   form has no role selector, so the shape of what was typed is what
-   *   decides which field it's sent as. The backend alone determines the
-   *   account's actual role from the database row and returns it in the
-   *   response; nothing here ever assumes or requests a particular role.
-   * @param {string} password
-   */
-  const login = useCallback(async (identifier, password) => {
-    let credentials;
-    if (identifier.includes('@')) {
-      credentials = { email: identifier, password };
-    } else if (looksLikeRollNumber(identifier)) {
-      credentials = { roll_number: identifier, password };
-    } else {
-      credentials = { username: identifier, password };
-    }
+  // =========================================================
+  // LOGIN
+  // =========================================================
 
-    const res = await authService.login(credentials);
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem(TOKEN_STORAGE_KEY, newToken);
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(newUser));
-    setToken(newToken);
-    setUser(newUser);
-    return newUser;
-  }, []);
+  const login = useCallback(
+    async (identifier, password) => {
+      let credentials;
+
+      const cleanIdentifier = identifier.trim();
+
+      // Login using Email
+      if (cleanIdentifier.includes("@")) {
+        credentials = {
+          email: cleanIdentifier,
+          password,
+        };
+      }
+
+      // Login using Roll Number
+      else if (looksLikeRollNumber(cleanIdentifier)) {
+        credentials = {
+          roll_number: cleanIdentifier,
+          password,
+        };
+      }
+
+      // Login using Username
+      else {
+        credentials = {
+          username: cleanIdentifier,
+          password,
+        };
+      }
+
+      console.log("Login credentials:", {
+        ...credentials,
+        password: "******",
+      });
+
+      const response =
+        await authService.login(credentials);
+
+      console.log("Login response:", response);
+
+      /*
+       * Depending on your apiClient/authService,
+       * response can be either:
+       *
+       * { token, user }
+       *
+       * OR
+       *
+       * { data: { token, user } }
+       */
+
+      const loginData =
+        response?.data || response;
+
+      const newToken =
+        loginData?.token;
+
+      const newUser =
+        loginData?.user;
+
+      // Check server response
+      if (!newToken || !newUser) {
+        console.error(
+          "Invalid login response:",
+          response
+        );
+
+        throw new Error(
+          "Invalid login response from server"
+        );
+      }
+
+      // =====================================================
+      // SAVE LOGIN DATA
+      // =====================================================
+
+      localStorage.setItem(
+        TOKEN_STORAGE_KEY,
+        newToken
+      );
+
+      localStorage.setItem(
+        USER_STORAGE_KEY,
+        JSON.stringify(newUser)
+      );
+
+      // =====================================================
+      // UPDATE REACT STATE
+      // =====================================================
+
+      setToken(newToken);
+      setUser(newUser);
+
+      // Clear old student profile
+      setStudentProfile(null);
+      setStudentProfileStatus("idle");
+
+      return newUser;
+    },
+    []
+  );
+
+  // =========================================================
+  // CONTEXT VALUE
+  // =========================================================
 
   const value = useMemo(
     () => ({
       user,
+
       token,
-      isAuthenticated: Boolean(token && user),
-      role: user?.role ?? null,
+
+      isAuthenticated:
+        Boolean(token && user),
+
+      role:
+        user?.role ?? null,
+
       initializing: false,
+
+      studentProfile,
+
+      studentProfileStatus,
+
+      login,
+
+      logout,
+
+      reloadStudentProfile:
+        loadStudentProfile,
+    }),
+    [
+      user,
+      token,
       studentProfile,
       studentProfileStatus,
       login,
       logout,
-      reloadStudentProfile: loadStudentProfile,
-    }),
-    [user, token, studentProfile, studentProfileStatus, login, logout, loadStudentProfile]
+      loadStudentProfile,
+    ]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // =========================================================
+  // PROVIDER
+  // =========================================================
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- co-located hook is intentional
+// ===========================================================
+// useAuth HOOK
+// ===========================================================
+
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
-  return ctx;
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error(
+      "useAuth must be used within an AuthProvider"
+    );
+  }
+
+  return context;
 }
+
+export default useAuth;

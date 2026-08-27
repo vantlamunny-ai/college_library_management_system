@@ -2,8 +2,10 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const db = require("./config/db");
+
 const returnRoutes = require("./routes/returnRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -14,13 +16,21 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const fineRoutes = require("./routes/fineRoutes");
 const issueRoutes = require("./routes/issueRoutes");
 const librarianRoutes = require("./routes/librarianRoutes");
+const digitalBookRoutes = require("./routes/digitalBookRoutes");
+
 const app = express();
 
 app.use(cors());
-// Default 100kb is too small for a profile-picture data URI (resized
-// client-side to a few hundred KB before it's ever sent).
+
 app.use(express.json({ limit: "3mb" }));
 
+// Serve uploaded files statically
+app.use(
+    "/uploads",
+    express.static(path.join(__dirname, "uploads"))
+);
+
+// Test server + database connection
 app.get("/", async (req, res) => {
     try {
         const [rows] = await db.query(
@@ -29,10 +39,10 @@ app.get("/", async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "College Library System DATABASE connected successfully",
+            message:
+                "College Library System DATABASE connected successfully",
             data: rows
         });
-
     } catch (error) {
         console.error("Error in connecting DB:", error);
 
@@ -43,21 +53,32 @@ app.get("/", async (req, res) => {
     }
 });
 
+// Routes Configuration
 app.use("/returns", returnRoutes);
+
 app.use("/reservations", reservationRoutes);
+
 app.use("/auth", authRoutes);
+
 app.use("/books", bookRoutes);
+
 app.use("/students", studentRoutes);
+
 app.use("/reports", reportRoutes);
+
 app.use("/notifications", notificationRoutes);
+
 app.use("/fines", fineRoutes);
+
 app.use("/issues", issueRoutes);
+
 app.use("/librarians", librarianRoutes);
 
-// Central error handler — every controller's `next(error)` lands here.
-// Without this, Express falls back to its default HTML error page, and
-// the frontend (which expects {success, message} JSON) loses the real
-// error message entirely.
+// Digital Books (Both endpoints added to avoid 404 errors)
+app.use("/digital-books", digitalBookRoutes);
+app.use("/api/digital-books", digitalBookRoutes);
+
+// Central error handler
 app.use((err, req, res, next) => {
     console.error(err);
 

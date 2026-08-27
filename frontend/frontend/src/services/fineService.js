@@ -1,21 +1,70 @@
-import apiClient from '../api/client';
-import { ENDPOINTS } from '../api/endpoints';
+import apiClient from '../api/client'
+import { ENDPOINTS } from '../api/endpoints'
 
-/** Admin/Librarian only per backend role middleware. */
-export function getAllFines() {
-  return apiClient.get(ENDPOINTS.fines.list);
+
+function extractArray(response) {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data
+  }
+
+  if (Array.isArray(response?.data?.data)) {
+    return response.data.data
+  }
+
+  if (Array.isArray(response?.fines)) {
+    return response.fines
+  }
+
+  if (Array.isArray(response?.data?.fines)) {
+    return response.data.fines
+  }
+
+  return []
 }
 
-/** Student-only per backend role middleware — scoped to the caller's own fines. */
-export function getMyFines() {
-  return apiClient.get(ENDPOINTS.fines.mine);
+
+/**
+ * Admin/Librarian only per backend role middleware.
+ */
+export async function getAllFines() {
+  const response = await apiClient.get(
+    ENDPOINTS.fines.list
+  )
+
+  return extractArray(response)
 }
+
+
+/**
+ * Student-only per backend role middleware.
+ * Scoped to the caller's own fines.
+ */
+export async function getMyFines() {
+  const response = await apiClient.get(
+    ENDPOINTS.fines.mine
+  )
+
+  return extractArray(response)
+}
+
 
 export function createFine(payload) {
-  return apiClient.post(ENDPOINTS.fines.create, payload);
+  return apiClient.post(
+    ENDPOINTS.fines.create,
+    payload
+  )
 }
 
-/** Student-only per backend role middleware. */
+
+/**
+ * Student-only per backend role middleware.
+ */
 export function payFine(fineId) {
-  return apiClient.put(ENDPOINTS.fines.pay(fineId));
+  return apiClient.put(
+    ENDPOINTS.fines.pay(fineId)
+  )
 }

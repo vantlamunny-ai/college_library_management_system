@@ -303,7 +303,17 @@ CREATE TABLE IF NOT EXISTS reviews (
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
+CREATE TABLE digital_books (
+    digital_book_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    access_type ENUM('Free', 'Students Only') DEFAULT 'Students Only',
+    status ENUM('Available', 'Unavailable') DEFAULT 'Available',
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+    FOREIGN KEY (book_id) REFERENCES books(book_id)
+);
 
 
 INSERT IGNORE INTO categories
@@ -586,6 +596,7 @@ VALUES
 );
 
 select * from books;
+ALTER TABLE books ADD COLUMN pdf_url VARCHAR(255) DEFAULT NULL;
 INSERT INTO authors
 (author_name, biography, email)
 VALUES
