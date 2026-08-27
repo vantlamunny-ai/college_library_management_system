@@ -319,6 +319,104 @@ async function deleteStudent(studentId) {
     }
 }
 
+async function deleteMyAccount(userId) {
+
+    const [studentRows] = await db.query(
+        `
+        SELECT student_id
+        FROM students
+        WHERE user_id = ?
+        `,
+        [userId]
+    );
+
+    if (studentRows.length === 0) {
+        const error = new Error("No student profile is linked to this account.");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    const studentId = studentRows[0].student_id;
+
+    const [activeIssues] = await db.query(
+        `
+        SELECT COUNT(*) AS count
+        FROM book_issues
+        WHERE student_id = ? AND status IN ('Issued', 'Overdue')
+        `,
+        [studentId]
+    );
+
+    if (activeIssues[0].count > 0) {
+        const error = new Error("Please return all borrowed books before deleting your account.");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const [pendingFines] = await db.query(
+        `
+        SELECT COUNT(*) AS count
+        FROM fines
+        WHERE student_id = ? AND payment_status = 'Pending'
+        `,
+        [studentId]
+    );
+
+    if (pendingFines[0].count > 0) {
+        const error = new Error("Please clear your pending fines before deleting your account.");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const connection = await db.getConnection();
+
+    try {
+
+        await connection.beginTransaction();
+
+        await connection.query(
+            `
+            DELETE FROM students
+            WHERE student_id = ?
+            `,
+            [studentId]
+        );
+
+        await connection.query(
+            `
+            DELETE FROM users
+            WHERE user_id = ?
+            `,
+            [userId]
+        );
+
+        await connection.commit();
+
+    } catch (error) {
+
+        await connection.rollback();
+
+        // book_issues/fines rows from past (already-returned/paid) activity
+        // still RESTRICT the delete even with no active issues/fines above —
+        // that's on-record borrowing history, not something the student can
+        // clear themselves, so a real admin has to close the account out.
+        if (error.code === "ER_ROW_IS_REFERENCED_2" || error.errno === 1451) {
+            const friendlyError = new Error(
+                "Your account has borrowing history on record and can't be deleted automatically. Please contact the library admin to close your account."
+            );
+            friendlyError.statusCode = 400;
+            throw friendlyError;
+        }
+
+        throw error;
+
+    } finally {
+
+        connection.release();
+
+    }
+}
+
 const USERNAME_PATTERN = /^[A-Za-z0-9._]+$/;
 const MAX_USERNAME_CHANGES_PER_YEAR = 7;
 const MAX_ACADEMIC_CHANGES_PER_YEAR = 2;
@@ -518,6 +616,7 @@ module.exports = {
     updateAccountStatus,
     updateMyProfile,
     changeUsername,
-    deleteStudent
+    deleteStudent,
+    deleteMyAccount
 
 };

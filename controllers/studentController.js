@@ -298,6 +298,26 @@ async function deleteStudent(req, res, next) {
     }
 }
 
+async function deleteMyAccount(req, res, next) {
+
+    try {
+
+        await studentService.deleteMyAccount(
+            req.user.user_id
+        );
+
+        res.json({
+            success: true,
+            message: "Your account has been deleted"
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+}
+
 module.exports = {
     getStudents,
     getStudent,
@@ -308,5 +328,6 @@ module.exports = {
     changeMyUsername,
     updateMyAcademicInfo,
     updateAccountStatus,
-    deleteStudent
+    deleteStudent,
+    deleteMyAccount
 };

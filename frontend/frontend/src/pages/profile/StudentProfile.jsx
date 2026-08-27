@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../../components/common/PageHeader'
 import { Panel } from '../../components/common/Panel'
 import { StatusBadge } from '../../components/common/StatusBadge'
 import { Modal } from '../../components/common/Modal'
+import { ConfirmDialog } from '../../components/common/ConfirmDialog'
 import { Avatar } from '../../components/common/Avatar'
 import { AvatarPicker } from '../../components/common/AvatarPicker'
 import { UnavailableState } from '../../components/common/ErrorState'
@@ -15,12 +17,28 @@ import { looksLikeUsername } from '../../utils/validation'
 import { formatDate } from '../../utils/date'
 
 export default function StudentProfile() {
-  const { user, studentProfile, studentProfileStatus, reloadStudentProfile } = useAuth()
+  const { user, studentProfile, studentProfileStatus, reloadStudentProfile, logout } = useAuth()
   const toast = useToast()
+  const navigate = useNavigate()
 
   const [avatarOpen, setAvatarOpen] = useState(false)
   const [usernameOpen, setUsernameOpen] = useState(false)
   const [academicOpen, setAcademicOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
+  const [deleteRun, deleteState] = useMutation(() => studentService.deleteMyAccount())
+
+  async function handleDeleteAccount() {
+    try {
+      await deleteRun()
+      toast.success('Your account has been deleted.')
+      logout()
+      navigate('/login', { replace: true })
+    } catch (err) {
+      toast.error(err?.message || 'Could not delete your account.')
+      setDeleteOpen(false)
+    }
+  }
 
   const [bio, setBio] = useState('')
   const [interests, setInterests] = useState('')
@@ -171,6 +189,28 @@ export default function StudentProfile() {
           </div>
         </form>
       </Panel>
+
+      <Panel title="Danger zone">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          <p className="clms-hint" style={{ margin: 0 }}>
+            Permanently delete your account and profile. This cannot be undone.
+          </p>
+          <button className="clms-btn clms-btn-danger" onClick={() => setDeleteOpen(true)}>
+            <i className="ti ti-trash" /> Delete account
+          </button>
+        </div>
+      </Panel>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        title="Delete your account"
+        message="This permanently deletes your profile and login — it cannot be undone. If you have books currently issued or pending fines, return/clear those first."
+        confirmLabel="Delete account"
+        tone="danger"
+        loading={deleteState.loading}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setDeleteOpen(false)}
+      />
 
       <AvatarPicker
         open={avatarOpen}

@@ -49,3 +49,12 @@ export function updateMyAcademicInfo(payload) {
 export function deleteStudent(id) {
   return apiClient.delete(ENDPOINTS.students.byId(id));
 }
+
+/**
+ * Student-only self-delete. Fails with a clear message (not a raw error) if
+ * the student has active issues/pending fines, or has borrowing history on
+ * record that a hard delete can't remove — those need an admin's help.
+ */
+export function deleteMyAccount() {
+  return apiClient.delete(ENDPOINTS.students.me);
+}

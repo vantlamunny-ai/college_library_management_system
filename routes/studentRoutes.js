@@ -52,6 +52,15 @@ router.put(
 );
 
 
+// Must also be registered before "/:id" for the same reason as "/me" above.
+router.delete(
+    "/me",
+    verifyToken,
+    authorizeRoles("Student"),
+    studentController.deleteMyAccount
+);
+
+
 router.get(
     "/:id",
     verifyToken,
