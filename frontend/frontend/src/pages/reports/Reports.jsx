@@ -23,13 +23,13 @@ export default function Reports() {
   const debouncedQuery = useDebounce(query, 250)
 
   const { data: dashboard, error: dashboardError, refetch: refetchDashboard } = useApi(() => reportService.getDashboardReport(), [])
-  const { data: books, loading: booksLoading } = useApi(() => reportService.getBookReport(), [], { enabled: tab === 'Books' || tab === 'Overview' })
-  const { data: issues, loading: issuesLoading } = useApi(() => reportService.getIssueReport(), [], { enabled: tab === 'Circulation' || tab === 'Overview' })
-  const { data: returns, loading: returnsLoading } = useApi(() => reportService.getReturnReport(), [], { enabled: tab === 'Returns' })
-  const { data: students, loading: studentsLoading } = useApi(() => reportService.getStudentReport(), [], { enabled: tab === 'Students' })
-  const { data: fines, loading: finesLoading } = useApi(() => reportService.getFineReport(), [], { enabled: tab === 'Fines' || tab === 'Overview' })
-  const { data: reservations, loading: reservationsLoading } = useApi(() => reportService.getReservationReport(), [], { enabled: tab === 'Reservations' })
-  const { data: copies, loading: copiesLoading } = useApi(() => reportService.getCopyReport(), [], { enabled: tab === 'Copies' })
+  const { data: books, loading: booksLoading, error: booksError, refetch: refetchBooks } = useApi(() => reportService.getBookReport(), [], { enabled: tab === 'Books' || tab === 'Overview' })
+  const { data: issues, loading: issuesLoading, error: issuesError, refetch: refetchIssues } = useApi(() => reportService.getIssueReport(), [], { enabled: tab === 'Circulation' || tab === 'Overview' })
+  const { data: returns, loading: returnsLoading, error: returnsError, refetch: refetchReturns } = useApi(() => reportService.getReturnReport(), [], { enabled: tab === 'Returns' })
+  const { data: students, loading: studentsLoading, error: studentsError, refetch: refetchStudents } = useApi(() => reportService.getStudentReport(), [], { enabled: tab === 'Students' })
+  const { data: fines, loading: finesLoading, error: finesError, refetch: refetchFines } = useApi(() => reportService.getFineReport(), [], { enabled: tab === 'Fines' || tab === 'Overview' })
+  const { data: reservations, loading: reservationsLoading, error: reservationsError, refetch: refetchReservations } = useApi(() => reportService.getReservationReport(), [], { enabled: tab === 'Reservations' })
+  const { data: copies, loading: copiesLoading, error: copiesError, refetch: refetchCopies } = useApi(() => reportService.getCopyReport(), [], { enabled: tab === 'Copies' })
 
   const monthlyIssues = useMemo(() => groupByMonth(issues || [], 'issue_date', 6), [issues])
   const fineDonut = useMemo(() => {
@@ -83,6 +83,8 @@ export default function Reports() {
         <Panel>
           <DataTable
             loading={booksLoading}
+            error={booksError}
+            onRetry={refetchBooks}
             rows={filterRows(books, ['title', 'isbn', 'category_name'])}
             keyField="book_id"
             emptyIcon="ti-books"
@@ -103,6 +105,8 @@ export default function Reports() {
         <Panel>
           <DataTable
             loading={issuesLoading}
+            error={issuesError}
+            onRetry={refetchIssues}
             rows={filterRows(issues, ['title', 'student_name', 'roll_number'])}
             keyField="issue_id"
             emptyIcon="ti-transfer"
@@ -123,6 +127,8 @@ export default function Reports() {
         <Panel>
           <DataTable
             loading={returnsLoading}
+            error={returnsError}
+            onRetry={refetchReturns}
             rows={filterRows(returns, ['title', 'student_name', 'roll_number'])}
             keyField="return_id"
             emptyIcon="ti-corner-down-left"
@@ -142,6 +148,8 @@ export default function Reports() {
         <Panel>
           <DataTable
             loading={studentsLoading}
+            error={studentsError}
+            onRetry={refetchStudents}
             rows={filterRows(students, ['student_name', 'roll_number', 'department'])}
             keyField="student_id"
             emptyIcon="ti-users"
@@ -163,6 +171,8 @@ export default function Reports() {
         <Panel>
           <DataTable
             loading={finesLoading}
+            error={finesError}
+            onRetry={refetchFines}
             rows={filterRows(fines, ['student_name', 'roll_number', 'title'])}
             keyField="fine_id"
             emptyIcon="ti-receipt"
@@ -182,6 +192,8 @@ export default function Reports() {
         <Panel>
           <DataTable
             loading={reservationsLoading}
+            error={reservationsError}
+            onRetry={refetchReservations}
             rows={filterRows(reservations, ['student_name', 'roll_number', 'title'])}
             keyField="reservation_id"
             emptyIcon="ti-bookmark"
@@ -201,6 +213,8 @@ export default function Reports() {
         <Panel>
           <DataTable
             loading={copiesLoading}
+            error={copiesError}
+            onRetry={refetchCopies}
             rows={filterRows(copies, ['title', 'accession_number', 'category_name'])}
             keyField="copy_id"
             emptyIcon="ti-books"
